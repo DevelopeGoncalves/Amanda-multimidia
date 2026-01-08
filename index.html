@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>MediaFlow - Mobile (v3.3)</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4e54c8;
+            --secondary: #8f94fb;
+            --dark: #1e1e2e;
+            --light: #f4f4f5;
+            --success: #00b894;
+            --whatsapp: #25D366;
+            --warning: #fdcb6e;
+            --danger: #ff7675;
+            --text-dark: #2d3436;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; display: flex; background-color: var(--light); height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR (Menu Lateral) --- */
+        .sidebar { 
+            width: 260px; 
+            background: var(--dark); 
+            color: white; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .brand { font-size: 1.5rem; font-weight: bold; margin-bottom: 40px; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
+        .brand-logo { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary); }
+
+        .menu-btn { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 8px; transition: 0.3s; display: flex; align-items: center; gap: 10px; opacity: 0.7; }
+        .menu-btn:hover, .menu-btn.active { background: rgba(255,255,255,0.1); opacity: 1; border-left: 4px solid var(--secondary); }
+        
+        /* Rodapé da Sidebar */
+        .sidebar-footer { 
+            margin-top: auto; 
+            padding-top: 20px; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            text-align: center; 
+            font-size: 0.85rem; 
+            color: rgba(255,255,255,0.6); 
+        }
+
+        .dev-badge { 
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; 
+            background: rgba(255,255,255,0.15); padding: 10px; border-radius: 8px; 
+            transition: 0.3s; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .dev-badge:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+        .dev-badge a { color: #ffffff !important; text-decoration: none; font-weight: bold; font-size: 0.95rem; }
+        .dev-logo { width: 25px; height: 25px; border-radius: 50%; }
+
+        /* --- CONTEÚDO PRINCIPAL --- */
+        .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 10px; }
+        
+        /* Mobile Toggle Button (Escondido no PC) */
+        .mobile-menu-toggle { display: none; font-size: 1.5rem; color: var(--dark); cursor: pointer; margin-right: 15px; }
+
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        /* Grid System */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+
+        /* Tables Responsive Wrapper */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; /* Garante que a tabela não quebre layout */ }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        
+        /* Buttons & Inputs */
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-whatsapp { background: var(--whatsapp); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1px solid #ccc; color: #555; }
+        .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+        
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; width: 100%; margin-bottom: 12px; font-size: 16px; /* Evita zoom no iPhone */ }
+
+        .section { display: none; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Specific Modules */
+        .mood-box { text-align: center; padding: 15px; border-radius: 8px; color: white; }
+        .mood-good { background: var(--success); }
+        .mood-meh { background: var(--warning); }
+        .mood-bad { background: var(--danger); }
+
+        .tag { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; white-space: nowrap; }
+        .tag-projecao { background: #e0f7fa; color: #006064; }
+        .tag-iluminacao { background: #fff3e0; color: #e65100; }
+        .tag-transmissao { background: #f3e5f5; color: #4a148c; }
+        .tag-suporte { background: #ffebee; color: #b71c1c; }
+
+        .roster-role-box { padding: 10px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; background: #fafafa; }
+        .roster-role-header { font-size: 0.75rem; text-transform: uppercase; color: #888; font-weight: bold; margin-bottom: 5px; }
+        .roster-role-content { display: flex; justify-content: space-between; align-items: center; }
+
+        .log-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; color: white; margin-right: 8px; font-weight: 600; }
+        .bg-sistema { background: #95a5a6; }
+        .bg-cadastro { background: #00b894; }
+        .bg-remocao { background: #ff7675; }
+        .bg-escala { background: #4e54c8; }
+        .bg-troca { background: #e17055; }
+
+        /* --- RESPONSIVIDADE (MOBILE) --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: 100%; overflow: auto; }
+            
+            /* Sidebar vira Menu Lateral (Off-canvas) */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px; /* Escondido */
+                height: 100vh;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+            }
+            .sidebar.show { left: 0; } /* Classe para mostrar */
+
+            /* Botão de Menu visível no mobile */
+            .mobile-menu-toggle { display: block; }
+
+            /* Ajustes do Conteúdo */
+            .main { padding: 15px; width: 100%; }
+            .header h1 { font-size: 1.5rem; }
+            
+            /* Grid vira 1 coluna */
+            .grid-4, .grid-2 { grid-template-columns: 1fr; }
+
+            /* Modais ocupam mais espaço */
+            dialog { width: 90% !important; max-width: none; }
+            
+            /* Overlay escuro quando menu abre */
+            .overlay {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5); z-index: 999; display: none;
+            }
+            .overlay.active { display: block; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="overlay" class="overlay" onclick="toggleMenu()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="brand">
+            <img src="img/logo.jpg" alt="Logo" class="brand-logo" onerror="this.src='https://via.placeholder.com/50?text=V'">
+            MediaFlow
+        </div>
+        
+        <div class="menu-btn active" onclick="showSection('dashboard'); toggleMenuMobile()"><i class="fas fa-chart-pie"></i> Dashboard</div>
+        <div class="menu-btn" onclick="showSection('escala'); toggleMenuMobile()"><i class="fas fa-calendar-alt"></i> Escalas (Líder)</div>
+        <div class="menu-btn" onclick="showSection('voluntarios'); toggleMenuMobile()"><i class="fas fa-users"></i> Voluntários</div>
+        <div class="menu-btn" onclick="showSection('historico'); toggleMenuMobile()"><i class="fas fa-history"></i> Histórico</div>
+
+        <div class="sidebar-footer">
+            <span>Desenvolvido por</span>
+            <div class="dev-badge">
+                <img src="img/logo.jpg" class="dev-logo" onerror="this.style.display='none'">
+                <strong>
+                <a href="https://www.instagram.com/victorino.eng/" target="_blank">Victorino.eng</a>
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div id="dashboard" class="section active">
+            <div class="header">
+                <div style="display:flex; align-items:center;">
+                    <i class="fas fa-bars mobile-menu-toggle" onclick="toggleMenu()"></i>
+                    <h1 style="margin:0">Visão Geral</h1>
+                </div>
+                <button class="btn btn-outline" onclick="resetSystem()"><i class="fas fa-trash-alt"></i> Resetar</button>
+            </div>
+            
+            <div class="grid-4">
+                <div class="card">
+                    <h3>Voluntários</h3>
+                    <h1 id="total-voluntarios">0</h1>
+                </div>
+                <div class="card">
+                    <h3>Próximo Culto</h3>
+                    <h2 id="prox-culto-data">--/--</h2>
+                </div>
+                <div class="card">
+                    <h3>Status Escala</h3>
+                    <h2 id="status-escala-dash">Pendente</h2>
+                </div>
+                <div class="card">
+                    <h3>Humor da Equipe</h3>
+                    <div id="humor-geral" class="mood-box mood-meh">Calculando...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⚠️ Avisos do Líder</h3>
+                <ul id="alertas-sistema" style="padding-left: 20px;"></ul>
+            </div>
+        </div>
+
+        <div id="escala" class="section">
+            <div class="header">
+                <div style="display:flex; align-items:center;">
+                    <i class="fas fa-bars mobile-menu-toggle" onclick="toggleMenu()"></i>
+                    <h1 style="margin:0">Escalas</h1>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('modal-escala')"><i class="fas fa-plus"></i> Nova</button>
+            </div>
+
+            <div id="lista-escalas"></div>
+        </div>
+
+        <div id="voluntarios" class="section">
+            <div class="header">
+                <div style="display:flex; align-items:center;">
+                    <i class="fas fa-bars mobile-menu-toggle" onclick="toggleMenu()"></i>
+                    <h1 style="margin:0">Voluntários</h1>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('modal-voluntario')"><i class="fas fa-user-plus"></i> Novo</button>
+            </div>
+            
+            <div class="card" style="padding:0; overflow:hidden;">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>WhatsApp</th>
+                                <th>Área</th>
+                                <th>Humor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-voluntarios"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="historico" class="section">
+            <div class="header">
+                <div style="display:flex; align-items:center;">
+                    <i class="fas fa-bars mobile-menu-toggle" onclick="toggleMenu()"></i>
+                    <h1 style="margin:0">Histórico</h1>
+                </div>
+                
+                <select id="filtro-historico" onchange="renderHistorico()" style="width: 150px; margin:0;">
+                    <option value="Todos">Filtrar: Todos</option>
+                    <option value="Cadastro">Cadastro</option>
+                    <option value="Escala">Escala</option>
+                    <option value="Troca">Troca</option>
+                    <option value="Remoção">Remoção</option>
+                    <option value="Sistema">Sistema</option>
+                </select>
+            </div>
+            <div class="card">
+                <ul id="lista-historico" style="list-style: none; padding: 0;"></ul>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="modal-voluntario" style="border:none; border-radius:8px; padding:20px; box-shadow:0 0 20px rgba(0,0,0,0.2); width: 350px;">
+        <h3>Novo Voluntário</h3>
+        <input type="text" id="v-nome" placeholder="Nome Completo">
+        <input type="tel" id="v-tel" placeholder="WhatsApp (DDD+Número)">
+        <select id="v-area">
+            <option value="Projeção">Projeção (Letras/OBS)</option>
+            <option value="Iluminação">Iluminação</option>
+            <option value="Transmissão">Transmissão (Câmeras)</option>
+            <option value="Suporte">Suporte / Cabos</option>
+        </select>
+        <label style="font-size:0.9rem;">Humor Atual (1=Péssimo, 5=Ótimo):</label>
+        <input type="number" id="v-humor" min="1" max="5" value="3">
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn btn-primary" style="flex:1" onclick="salvarVoluntario()">Salvar</button>
+            <button class="btn btn-danger" style="flex:1" onclick="closeModal('modal-voluntario')">Cancelar</button>
+        </div>
+    </dialog>
+
+    <dialog id="modal-escala" style="border:none; border-radius:8px; padding:20px; width: 400px; box-shadow:0 0 20px rgba(0,0,0,0.2);">
+        <h3>Criar Escala</h3>
+        <input type="date" id="e-data">
+        <input type="text" id="e-tipo" placeholder="Tipo (ex: Culto Domingo)">
+        
+        <h4>Escalar Time:</h4>
+        <label style="font-size:0.8rem">🖥️ Projeção:</label>
+        <select id="sel-projecao" class="select-voluntario"></select>
+        <label style="font-size:0.8rem">💡 Iluminação:</label>
+        <select id="sel-iluminacao" class="select-voluntario"></select>
+        <label style="font-size:0.8rem">📡 Transmissão:</label>
+        <select id="sel-transmissao" class="select-voluntario"></select>
+        <label style="font-size:0.8rem">🏃 Suporte:</label>
+        <select id="sel-suporte" class="select-voluntario"></select>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn btn-primary" style="flex:1" onclick="salvarEscala()">Criar</button>
+            <button class="btn btn-danger" style="flex:1" onclick="closeModal('modal-escala')">Cancelar</button>
+        </div>
+    </dialog>
+
+    <dialog id="modal-troca" style="border:none; border-radius:8px; padding:20px; width: 350px; box-shadow:0 0 20px rgba(0,0,0,0.2);">
+        <h3>🔄 Trocar Voluntário</h3>
+        <p id="troca-titulo" style="font-size:0.9rem; color:#666;"></p>
+        <label>Selecione o substituto:</label>
+        <select id="select-troca-voluntario"></select>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button class="btn btn-primary" style="flex:1" onclick="confirmarTroca()">Trocar</button>
+            <button class="btn btn-danger" style="flex:1" onclick="closeModal('modal-troca')">Cancelar</button>
+        </div>
+    </dialog>
+
+    <script>
+        // --- LOGICA MOBILE ---
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('active');
+        }
+
+        // Fecha o menu automaticamente ao clicar num item (apenas no mobile)
+        function toggleMenuMobile() {
+            if (window.innerWidth <= 768) {
+                toggleMenu();
+            }
+        }
+
+        // --- SISTEMA ORIGINAL ---
+        let currentSwapScaleId = null;
+        let currentSwapRole = null;
+        let db = { voluntarios: [], escalas: [], historico: [] };
+
+        window.onload = function() {
+            carregarDados();
+            if(db.voluntarios.length === 0) seedData(); 
+            atualizarUI();
+        }
+
+        function carregarDados() {
+            try {
+                const saved = localStorage.getItem('mediaflow_v3_db');
+                if (saved) db = JSON.parse(saved);
+            } catch(e) { console.error("Erro ao carregar", e); }
+        }
+
+        function salvarDados() {
+            try {
+                localStorage.setItem('mediaflow_v3_db', JSON.stringify(db));
+                atualizarUI();
+            } catch(e) { alert("Erro ao salvar."); }
+        }
+
+        function seedData() {
+            db.voluntarios = [
+                { id: 1, nome: "Ana Silva", tel: "27999999999", area: "Projeção", humor: 4 },
+                { id: 2, nome: "Marcos Luz", tel: "27988888888", area: "Iluminação", humor: 2 }
+            ];
+            logHistory("Sistema", "Base inicializada.");
+            salvarDados();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            // Nota: No código original, event.currentTarget falha se chamado via script. 
+            // Ajustado para buscar pelo onclick se necessário, mas visualmente já funciona pelo render.
+            // Para simplicidade, deixamos o CSS active cuidar do sidebar via clique.
+            
+            // Corrige destaque visual no menu sidebar
+            const menus = document.querySelectorAll('.menu-btn');
+            menus.forEach(btn => {
+                if(btn.getAttribute('onclick').includes(id)) btn.classList.add('active');
+            });
+        }
+
+        function openModal(id) {
+            if(id === 'modal-escala') preencherSelects();
+            document.getElementById(id).showModal();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).close();
+        }
+
+        function atualizarUI() {
+            renderDashboard();
+            renderVoluntarios();
+            renderEscalas();
+            renderHistorico();
+        }
+
+        // --- CORE FUNCTIONS ---
+        function salvarVoluntario() {
+            const nome = document.getElementById('v-nome').value.trim();
+            const tel = document.getElementById('v-tel').value.replace(/\D/g,'');
+            const area = document.getElementById('v-area').value;
+            const humor = parseInt(document.getElementById('v-humor').value);
+
+            if(!nome) return alert("Nome obrigatório!");
+
+            db.voluntarios.push({ id: Date.now(), nome, tel, area, humor });
+            logHistory("Cadastro", `Novo: ${nome}`);
+            
+            document.getElementById('v-nome').value = '';
+            document.getElementById('v-tel').value = '';
+            closeModal('modal-voluntario');
+            salvarDados();
+            alert("Salvo!");
+        }
+
+        function removerVoluntario(id) {
+            if(!confirm("Remover voluntário?")) return;
+            db.voluntarios = db.voluntarios.filter(v => v.id !== id);
+            logHistory("Remoção", "Voluntário removido");
+            salvarDados();
+        }
+
+        function preencherSelects() {
+            const selects = document.querySelectorAll('.select-voluntario');
+            selects.forEach(sel => {
+                sel.innerHTML = '<option value="">-- Selecione --</option>';
+                db.voluntarios.forEach(vol => {
+                    sel.innerHTML += `<option value="${vol.id}">${vol.nome} (${vol.area})</option>`;
+                });
+            });
+        }
+
+        function salvarEscala() {
+            const data = document.getElementById('e-data').value;
+            const tipo = document.getElementById('e-tipo').value;
+            const time = {
+                projecao: document.getElementById('sel-projecao').value,
+                iluminacao: document.getElementById('sel-iluminacao').value,
+                transmissao: document.getElementById('sel-transmissao').value,
+                suporte: document.getElementById('sel-suporte').value
+            };
+
+            if(!data) return alert("Data obrigatória");
+            
+            db.escalas.push({ id: Date.now(), data, tipo, time, status: 'Pendente' });
+            logHistory("Escala", `Criada: ${tipo}`);
+            closeModal('modal-escala');
+            salvarDados();
+        }
+
+        function abrirModalTroca(escalaId, role) {
+            currentSwapScaleId = escalaId;
+            currentSwapRole = role;
+            const roleMap = { 'projecao': 'Projeção', 'iluminacao': 'Iluminação', 'transmissao': 'Transmissão', 'suporte': 'Suporte' };
+            const areaAlvo = roleMap[role];
+            
+            document.getElementById('troca-titulo').innerText = `Substituindo: ${areaAlvo}`;
+            const select = document.getElementById('select-troca-voluntario');
+            select.innerHTML = '<option value="">-- Selecione --</option>';
+            
+            db.voluntarios.filter(v => v.area === areaAlvo).forEach(v => {
+                select.innerHTML += `<option value="${v.id}">${v.nome}</option>`;
+            });
+            document.getElementById('modal-troca').showModal();
+        }
+
+        function confirmarTroca() {
+            const novoId = document.getElementById('select-troca-voluntario').value;
+            if(!novoId) return alert("Selecione alguém.");
+            
+            const esc = db.escalas.find(e => e.id === currentSwapScaleId);
+            if(esc) {
+                esc.time[currentSwapRole] = novoId;
+                logHistory("Troca", `Alteração realizada na escala`);
+                salvarDados();
+                closeModal('modal-troca');
+            }
+        }
+
+        function enviarZapIndividual(volId, dataEscala, funcao) {
+            const vol = db.voluntarios.find(v => v.id == volId);
+            if (!vol || !vol.tel) return alert("Sem telefone.");
+            const msg = `Olá *${vol.nome}*! 👋\nVocê foi escalado: *${funcao}* dia *${new Date(dataEscala).toLocaleDateString('pt-BR')}*.\nConfirma?`;
+            window.open(`https://wa.me/55${vol.tel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function copiarEscalaGrupo(escalaId) {
+            const e = db.escalas.find(sc => sc.id === escalaId);
+            const getNm = (id) => { const v = db.voluntarios.find(x => x.id == id); return v ? v.nome : 'Aberto'; };
+            
+            let txt = `*ESCALA - ${e.tipo.toUpperCase()}*\n📅 ${new Date(e.data).toLocaleDateString('pt-BR')}\n\n`;
+            txt += `🖥️ Proj: ${getNm(e.time.projecao)}\n💡 Luz: ${getNm(e.time.iluminacao)}\n📡 Cam: ${getNm(e.time.transmissao)}\n`;
+            if(e.time.suporte) txt += `🏃 Sup: ${getNm(e.time.suporte)}\n`;
+            
+            navigator.clipboard.writeText(txt).then(() => alert("Copiado!"));
+        }
+
+        // --- RENDER ---
+        function getTagClass(area) {
+            const map = { 'Projeção': 'tag-projecao', 'Iluminação': 'tag-iluminacao', 'Transmissão': 'tag-transmissao', 'Suporte': 'tag-suporte' };
+            return map[area] || 'tag-suporte';
+        }
+
+        function renderVoluntarios() {
+            const tbody = document.getElementById('tabela-voluntarios');
+            tbody.innerHTML = '';
+            db.voluntarios.forEach(v => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${v.nome}</strong></td>
+                        <td>${v.tel || '-'}</td>
+                        <td><span class="tag ${getTagClass(v.area)}">${v.area}</span></td>
+                        <td>${'⭐'.repeat(v.humor)}</td>
+                        <td><button class="btn btn-danger btn-sm" onclick="removerVoluntario(${v.id})"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
+            });
+        }
+
+        function renderEscalas() {
+            const container = document.getElementById('lista-escalas');
+            container.innerHTML = '';
+            
+            [...db.escalas].sort((a,b) => new Date(a.data) - new Date(b.data)).forEach(e => {
+                const renderRole = (key, nome, icon) => {
+                    const vol = db.voluntarios.find(v => v.id == e.time[key]);
+                    if(!vol) return `
+                        <div class="roster-role-box" style="border-left: 3px solid #ccc">
+                            <div class="roster-role-header">${icon} ${nome}</div>
+                            <div class="roster-role-content">
+                                <span style="color:red; font-size:0.9rem">Vazio</span>
+                                <button class="btn-sm btn-outline" onclick="abrirModalTroca(${e.id}, '${key}')">Add</button>
+                            </div>
+                        </div>`;
+                    return `
+                        <div class="roster-role-box" style="border-left: 3px solid var(--primary)">
+                            <div class="roster-role-header">${icon} ${nome}</div>
+                            <div class="roster-role-content">
+                                <strong style="font-size:0.9rem">${vol.nome.split(' ')[0]}</strong>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="btn-sm btn-whatsapp" onclick="enviarZapIndividual(${vol.id}, '${e.data}', '${nome}')"><i class="fab fa-whatsapp"></i></button>
+                                    <button class="btn-sm btn-outline" onclick="abrirModalTroca(${e.id}, '${key}')"><i class="fas fa-exchange-alt"></i></button>
+                                </div>
+                            </div>
+                        </div>`;
+                };
+
+                const suporteBlock = e.time.suporte ? renderRole('suporte', 'Suporte', '🏃') : 
+                    `<div class="roster-role-box" style="border:1px dashed #ccc; text-align:center; padding:10px; color:#888; font-size:0.8rem;">S/ Suporte <a href="#" onclick="abrirModalTroca(${e.id}, 'suporte')">Add</a></div>`;
+
+                container.innerHTML += `
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                            <div><h3 style="margin:0; font-size:1.1rem;">${new Date(e.data).toLocaleDateString('pt-BR')} <small style="display:block; font-size:0.8rem; color:#666">${e.tipo}</small></h3></div>
+                            <button class="btn btn-whatsapp btn-sm" onclick="copiarEscalaGrupo(${e.id})"><i class="far fa-copy"></i></button>
+                        </div>
+                        <div class="grid-4">
+                            ${renderRole('projecao', 'Projeção', '🖥️')}
+                            ${renderRole('iluminacao', 'Iluminação', '💡')}
+                            ${renderRole('transmissao', 'Transmissão', '📡')}
+                            ${suporteBlock}
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function renderHistorico() {
+            const lista = document.getElementById('lista-historico');
+            const filtro = document.getElementById('filtro-historico').value;
+            lista.innerHTML = '';
+            
+            const logs = db.historico.filter(h => filtro === 'Todos' || h.tipo === filtro);
+            const colorMap = { 'Sistema': 'bg-sistema', 'Cadastro': 'bg-cadastro', 'Remoção': 'bg-remocao', 'Escala': 'bg-escala', 'Troca': 'bg-troca' };
+
+            if(logs.length === 0) return lista.innerHTML = '<li style="padding:15px; color:#999; text-align:center;">Vazio.</li>';
+
+            logs.forEach(h => {
+                lista.innerHTML += `
+                    <li style="padding:12px; border-bottom:1px solid #eee; font-size:0.9rem; display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <span style="color:#888; font-size:0.75rem; width:100%;">${h.data}</span> 
+                        <span class="log-badge ${colorMap[h.tipo] || 'bg-sistema'}">${h.tipo}</span> 
+                        <span style="flex:1;">${h.msg}</span>
+                    </li>`;
+            });
+        }
+
+        function renderDashboard() {
+            document.getElementById('total-voluntarios').innerText = db.voluntarios.length;
+            const proxima = db.escalas.filter(e => new Date(e.data) >= new Date()).sort((a,b) => new Date(a.data) - new Date(b.data))[0];
+            document.getElementById('prox-culto-data').innerText = proxima ? new Date(proxima.data).toLocaleDateString('pt-BR').slice(0,5) : "--";
+            document.getElementById('status-escala-dash').innerText = proxima ? "Ativa" : "S/ Escala";
+
+            const media = db.voluntarios.length ? (db.voluntarios.reduce((acc, v) => acc + v.humor, 0) / db.voluntarios.length).toFixed(1) : 0;
+            const humorEl = document.getElementById('humor-geral');
+            humorEl.className = `mood-box ${media >= 4 ? 'mood-good' : media >= 2.5 ? 'mood-meh' : 'mood-bad'}`;
+            humorEl.innerText = `Média: ${media}`;
+            
+            const alertas = document.getElementById('alertas-sistema');
+            alertas.innerHTML = '<li>Sistema v3.3 (Mobile)</li>';
+            if(media < 3 && db.voluntarios.length > 0) alertas.innerHTML += `<li style="color:red">🚨 Equipe desmotivada.</li>`;
+        }
+
+        function logHistory(tipo, msg) {
+            db.historico.unshift({ data: new Date().toLocaleString('pt-BR'), tipo, msg });
+            if(db.historico.length > 50) db.historico.pop();
+        }
+
+        function resetSystem() {
+            if(prompt("Digite DELETAR para apagar:") === 'DELETAR') {
+                localStorage.removeItem('mediaflow_v3_db');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
