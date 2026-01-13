@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MediaFlow Elite</title>
+    <title>MediaFlow Elite 3.2</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -27,7 +27,7 @@
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background-color: var(--background); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- NAVEGAÇÃO ELITE --- */
+        /* --- NAVEGAÇÃO --- */
         .sidebar { 
             width: 280px; background: var(--dark); color: white; padding: 24px; 
             display: flex; flex-direction: column; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -44,6 +44,9 @@
         .menu-btn:hover { background: rgba(255,255,255,0.05); color: white; }
         .menu-btn.active { background: var(--primary); color: white; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3); }
 
+        .menu-btn.btn-confirm { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); }
+        .menu-btn.btn-confirm:hover, .menu-btn.btn-confirm.active { background: var(--success); color: white; }
+
         /* --- CONTEÚDO --- */
         .main { flex: 1; overflow-y: auto; padding: 25px; padding-bottom: 120px; position: relative; scroll-behavior: smooth; }
         .header-mobile { display: none; align-items: center; justify-content: space-between; margin-bottom: 25px; background: white; padding: 15px; border-radius: 20px; box-shadow: var(--shadow); }
@@ -53,32 +56,80 @@
         .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: var(--radius-md); text-align: center; box-shadow: var(--shadow); }
         
-        /* --- VOLUNTÁRIOS ELITE --- */
+        /* --- VOLUNTÁRIOS --- */
         .grid-voluntarios { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
         .v-card { 
             background: white; border-radius: var(--radius-lg); padding: 20px; text-align: center; 
             box-shadow: var(--shadow); transition: 0.3s ease; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
         }
         .v-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .v-card img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 4px solid #f1f5f9; }
-        .v-card .rank { position: absolute; top: 15px; left: 15px; background: var(--warning); color: white; padding: 4px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; }
-
-        /* --- ESCALAS COM FOTO --- */
+        
+        /* --- ESCALAS --- */
         .escala-card { border-left: 8px solid var(--primary); }
         .escala-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 20px; }
-        .slot { background: #f8fafc; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 12px; border: 1px solid #e2e8f0; }
+        
+        .slot { 
+            background: #f8fafc; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 12px; 
+            border: 1px solid #e2e8f0; position: relative; transition: 0.3s;
+            color: var(--text-main) !important; 
+        }
+        .slot div { color: var(--text-main) !important; }
+        .slot.status-confirmed { border-color: var(--success); background: #ecfdf5; }
+        .slot.status-declined { border-color: var(--danger); background: #fef2f2; opacity: 0.7; }
         .slot img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #ddd; }
         
-        /* --- BOTÕES --- */
+        /* --- ÁREA DE CONFIRMAÇÃO (SEARCH) --- */
+        .confirm-container { max-width: 800px; margin: 0 auto; text-align: center; }
+        
+        /* Search Box Styles */
+        .search-wrapper { position: relative; margin-bottom: 20px; }
+        .search-wrapper i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2rem; }
+        .search-input { 
+            width: 100%; padding: 18px 18px 18px 55px; border-radius: 16px; border: 2px solid #e2e8f0; 
+            font-size: 1.1rem; outline: none; transition: 0.3s; background: white;
+        }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
+
+        /* Grid de Nomes para Seleção */
+        .name-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+            gap: 15px; margin-bottom: 30px; max-height: 220px; overflow-y: auto; padding: 5px;
+        }
+        .name-btn {
+            background: white; border: 2px solid transparent; border-radius: 16px; padding: 15px;
+            cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .name-btn img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #eee; }
+        .name-btn span { font-weight: 700; font-size: 0.85rem; line-height: 1.2; color: var(--text-main); }
+        
+        .name-btn:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+        .name-btn.selected { border-color: var(--success); background: #f0fdf4; transform: scale(0.98); }
+
+        .my-scale-card { 
+            background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; 
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: var(--shadow); border: 1px solid #e2e8f0; text-align: left;
+        }
+        .btn-confirm-big {
+            background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 12px;
+            font-size: 1rem; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-confirm-big:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* --- MODAL SENHA --- */
+        .password-display { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .num-btn { padding: 15px; font-size: 1.2rem; border-radius: 12px; border: 1px solid #e2e8f0; background: white; cursor: pointer; font-weight: bold; }
+        .num-btn:active { background: #e2e8f0; }
+
+        /* --- BOTÕES GERAIS --- */
         .btn { border: none; border-radius: 14px; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; padding: 12px 20px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-whatsapp { background: var(--whatsapp); color: white; }
         .btn-danger { background: #fee2e2; color: var(--danger); }
         .btn-sm { padding: 8px 12px; font-size: 0.8rem; }
-
-        /* --- CHECKLIST --- */
-        .check-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid #f1f5f9; }
-        .check-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--success); }
 
         /* --- RESPONSIVIDADE --- */
         @media (max-width: 768px) {
@@ -93,7 +144,6 @@
         .overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 1000; }
         .overlay.active { display: block; }
 
-        /* Badge Estilos */
         .badge { padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; }
         .area-projecao { background: #e0e7ff; color: #4338ca; }
         .area-iluminacao { background: #fef3c7; color: #b45309; }
@@ -102,6 +152,8 @@
 
         dialog { border: none; border-radius: 28px; padding: 30px; width: 95%; max-width: 450px; }
         input, select { width: 100%; padding: 14px; margin: 10px 0 20px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; }
+        .toggle-externo { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.9rem; color: var(--text-muted); font-weight: 700; }
+        .toggle-externo input { width: auto; margin: 0; }
     </style>
 </head>
 <body>
@@ -116,19 +168,21 @@
         
         <a href="#" class="menu-btn active" onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</a>
         <a href="#" class="menu-btn" onclick="showSection('escala')"><i class="fas fa-calendar-check"></i> Escalas</a>
-        <a href="#" class="menu-btn" onclick="showSection('voluntarios')"><i class="fas fa-user-astronaut"></i> Equipe</a>
+        <a href="#" class="menu-btn btn-confirm" onclick="showSection('confirmacao')"><i class="fas fa-check-circle"></i> Confirmação</a>
+        <a href="#" class="menu-btn" onclick="showSection('voluntarios')"><i class="fas fa-users"></i> Equipe</a>
         <a href="#" class="menu-btn" onclick="showSection('checklist')"><i class="fas fa-tasks"></i> Checklist</a>
         <a href="#" class="menu-btn" onclick="showSection('historico')"><i class="fas fa-history"></i> Log</a>
 
-        <div style="margin-top: auto; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+        <div style="margin-top: auto; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px; display: flex; flex-direction: column; gap: 8px;">
             <button class="btn btn-sm btn-primary" style="width:100%" onclick="exportData()"><i class="fas fa-file-export"></i> Backup</button>
+            <button class="btn btn-sm btn-danger" style="width:100%; color:#ef4444" onclick="forceReset()"><i class="fas fa-sync"></i> Resetar</button>
         </div>
     </nav>
 
     <main class="main">
         <header class="header-mobile">
             <i class="fas fa-bars" onclick="toggleMenu()" style="font-size: 1.5rem;"></i>
-            <span style="font-weight: 800;">DASHBOARD</span>
+            <span style="font-weight: 800;">MEDIAFLOW</span>
             <img src="img/logo.jpg" style="width:35px; border-radius:8px;" onerror="this.style.display='none'">
         </header>
 
@@ -140,8 +194,8 @@
                     <h2 id="count-v" style="margin:5px 0">0</h2>
                 </div>
                 <div class="stat-card">
-                    <span style="color:var(--text-muted); font-size: 0.8rem; font-weight: 700;">HUMOR MÉDIO</span>
-                    <h2 id="count-h" style="margin:5px 0">0.0</h2>
+                    <span style="color:var(--text-muted); font-size: 0.8rem; font-weight: 700;">ESCALAS ATIVAS</span>
+                    <h2 id="count-e" style="margin:5px 0">0</h2>
                 </div>
             </div>
 
@@ -152,23 +206,47 @@
             </div>
 
             <div class="card">
-                <h3 style="margin-top:0"><i class="fas fa-crown" style="color:var(--warning)"></i> Ranking de Serviço</h3>
-                <div id="ranking-list"></div>
+                <h3 style="margin-top:0"><i class="fas fa-birthday-cake" style="color:var(--warning)"></i> Aniversariantes do Mês</h3>
+                <div id="birthday-list">
+                    <p style="color:#94a3b8; text-align:center">Nenhum aniversariante encontrado.</p>
+                </div>
             </div>
         </section>
 
         <section id="escala" class="content-section" style="display:none">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2>Escalas Mensais</h2>
-                <button class="btn btn-primary" onclick="openModal('modal-escala')"><i class="fas fa-plus"></i> Nova</button>
+                <button class="btn btn-primary" onclick="verifyAdmin('modal-escala')"><i class="fas fa-plus"></i> Nova</button>
             </div>
             <div id="lista-escalas"></div>
         </section>
 
+        <section id="confirmacao" class="content-section" style="display:none">
+            <div class="confirm-container">
+                <div style="margin-bottom: 20px;">
+                    <h2><i class="fas fa-check-double" style="color:var(--success)"></i> Confirme sua Presença</h2>
+                    <p style="color:var(--text-muted)">Digite seu nome ou clique na sua foto abaixo.</p>
+                </div>
+                
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-name-input" class="search-input" placeholder="Digite seu nome..." onkeyup="filterNames()">
+                </div>
+
+                <div id="name-grid-container" class="name-grid">
+                    </div>
+
+                <div id="confirm-results" style="text-align: left; margin-top: 30px; border-top: 2px dashed #e2e8f0; padding-top: 20px; display: none;">
+                    <h3 id="selected-user-name" style="color:var(--primary); text-align:center"></h3>
+                    <div id="scale-list-container"></div>
+                </div>
+            </div>
+        </section>
+
         <section id="voluntarios" class="content-section" style="display:none">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2>Nossa Equipe</h2>
-                <button class="btn btn-primary" onclick="openModal('modal-voluntario')"><i class="fas fa-plus"></i></button>
+                <h2>Equipe Organizada</h2>
+                <button class="btn btn-primary" onclick="verifyAdmin('modal-voluntario')"><i class="fas fa-plus"></i></button>
             </div>
             <div class="grid-voluntarios" id="lista-v"></div>
         </section>
@@ -194,6 +272,8 @@
                 <select id="filter-log" onchange="renderLog()" style="width:120px; margin:0">
                     <option value="Tudo">Tudo</option>
                     <option value="Escala">Escalas</option>
+                    <option value="Troca">Trocas</option>
+                    <option value="Confirmação">Confirmações</option>
                     <option value="Sistema">Sistema</option>
                 </select>
             </div>
@@ -204,12 +284,25 @@
     <dialog id="modal-escala">
         <h3>Nova Escala</h3>
         <input type="date" id="e-data">
+        <label>Tipo de Evento</label>
+        <select id="e-categoria" onchange="toggleSuporteField()">
+            <option value="comum">Culto Comum</option>
+            <option value="especial">Evento Especial</option>
+        </select>
         <input type="text" id="e-tipo" placeholder="Ex: Culto da Família">
         
         <label>🖥️ Projeção</label><select id="sel-projecao"></select>
         <label>💡 Iluminação</label><select id="sel-iluminacao"></select>
         <label>📡 Transmissão</label><select id="sel-transmissao"></select>
-        <label>🏃 Suporte</label><select id="sel-suporte"></select>
+        
+        <div id="wrapper-suporte" style="display:none; background:#f0f9ff; padding:10px; border-radius:12px; margin-bottom:15px; border:1px dashed #0ea5e9;">
+            <label style="color:#0284c7; font-weight:800">🏃 Suporte (Evento Especial)</label>
+            <div class="toggle-externo">
+                <input type="checkbox" id="check-externo" onchange="toggleInputSuporte()"> Pessoa de fora?
+            </div>
+            <select id="sel-suporte"></select>
+            <input type="text" id="inp-suporte-ext" placeholder="Nome do Convidado" style="display:none; margin-bottom:0">
+        </div>
 
         <div style="display:flex; gap:10px;">
             <button class="btn btn-primary" style="flex:1" onclick="addEscala()">Salvar</button>
@@ -220,6 +313,8 @@
     <dialog id="modal-voluntario">
         <h3>Adicionar Membro</h3>
         <input type="text" id="v-nome" placeholder="Nome Completo">
+        <label style="font-size:0.9rem; font-weight:700">Data de Nascimento:</label>
+        <input type="date" id="v-nasc">
         <input type="tel" id="v-tel" placeholder="WhatsApp (DDD)">
         <select id="v-area">
             <option value="Projeção">Projeção</option>
@@ -232,54 +327,262 @@
     </dialog>
 
     <dialog id="modal-troca">
-        <h3>Substituição Rápida</h3>
+        <h3>Substituição (Área Restrita)</h3>
         <p id="troca-desc" style="font-size: 0.9rem; color: var(--text-muted)"></p>
         <select id="sel-troca"></select>
         <button class="btn btn-primary" style="width:100%" onclick="confirmTroca()">Confirmar Troca</button>
         <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="closeModal('modal-troca')">Fechar</button>
     </dialog>
 
+    <dialog id="modal-senha" style="max-width: 320px;">
+        <h3 style="text-align:center">Área Restrita</h3>
+        <p style="text-align:center; margin-bottom:10px">Digite a senha numérica:</p>
+        <input type="password" id="input-senha" style="text-align:center; letter-spacing:5px; font-size:1.5rem" readonly>
+        
+        <div class="password-display">
+            <button class="num-btn" onclick="addPass('1')">1</button>
+            <button class="num-btn" onclick="addPass('2')">2</button>
+            <button class="num-btn" onclick="addPass('3')">3</button>
+            <button class="num-btn" onclick="addPass('4')">4</button>
+            <button class="num-btn" onclick="addPass('5')">5</button>
+            <button class="num-btn" onclick="addPass('6')">6</button>
+            <button class="num-btn" onclick="addPass('7')">7</button>
+            <button class="num-btn" onclick="addPass('8')">8</button>
+            <button class="num-btn" onclick="addPass('9')">9</button>
+            <button class="num-btn" onclick="clearPass()" style="background:#fee2e2; color:#ef4444">C</button>
+            <button class="num-btn" onclick="addPass('0')">0</button>
+            <button class="num-btn" onclick="checkPass()" style="background:var(--success); color:white"><i class="fas fa-check"></i></button>
+        </div>
+        <button class="btn btn-sm" onclick="closeModal('modal-senha')" style="width:100%; margin-top:15px; border:1px solid #ccc">Cancelar</button>
+    </dialog>
+
     <script>
         let db = { voluntarios: [], escalas: [], historico: [], checklist: [] };
         let currentSwapData = null;
+        let pendingAction = null; 
+        let selectedUserIdForConfirm = null;
 
         window.onload = () => {
-            const saved = localStorage.getItem('mediaflow_elite_v1');
-            if(saved) db = JSON.parse(saved);
-            if(db.voluntarios.length === 0) seed();
+            const saved = localStorage.getItem('mediaflow_elite_v32');
+            if(saved) {
+                db = JSON.parse(saved);
+            } else {
+                // Tenta migrar da v31
+                const old = localStorage.getItem('mediaflow_elite_v31');
+                if(old) {
+                    db = JSON.parse(old);
+                    save(); // Salva no novo formato
+                } else {
+                    seed();
+                }
+            }
+            // Populate na inicialização
+            filterNames();
             updateUI();
         };
+
+        function forceReset() {
+            if(confirm("ATENÇÃO: Isso apagará tudo! Deseja continuar?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
 
         function seed() {
             const lista = [
                 {n: "Alisson Miranda", a: "Projeção", f: "alisson.jpg"},
-                {n: "Stefani Vieira", a: "Iluminação", f: "stefani.jpg"},
-                {n: "Sophia Almeida de gois", a: "Transmissão", f: "sophia.jpg"},
-                {n: "Anna Luiza Nascimento Souza", a: "Suporte", f: "anna.jpg"},
-                {n: "Thatyla Almeida Couto", a: "Projeção", f: "thatyla.jpg"},
+                {n: "Stefani Vieira", a: "Projeção", f: "stefani.jpg"},
+                {n: "Sophia Almeida de gois", a: "Projeção", f: "sophia.jpg"},
+                {n: "Anna Luiza Nascimento Souza", a: "Transmissão", f: "anna.jpg"},
+                {n: "Thatyla Almeida Couto", a: "Transmissão", f: "thatyla.jpg"},
                 {n: "Calebe Ramos De Gois", a: "Iluminação", f: "calebe.jpg"},
                 {n: "Paulo Henrique Mendes", a: "Transmissão", f: "paulo.jpg"},
-                {n: "Henrique Marçal Brito", a: "Suporte", f: "henrique.jpg"},
+                {n: "Henrique Marçal Brito", a: "Iluminação", f: "henrique.jpg"},
                 {n: "Luiza Messa Lemos Farias", a: "Projeção", f: "luiza.jpg"},
-                {n: "Higor Cauã Rosa Moreira", a: "Iluminação", f: "higor.jpg"},
-                {n: "Bryan Lucas Rodrigues de Souza", a: "Transmissão", f: "bryan.jpg"},
-                {n: "Alex Gonçalves Victorino", a: "Suporte", f: "alex.jpg"},
+                {n: "Higor Cauã Rosa Moreira", a: "Projeção", f: "higor.jpg"},
+                {n: "Bryan Lucas Rodrigues de Souza", a: "Iluminação", f: "bryan.jpg"},
+                {n: "Alex Gonçalves Victorino", a: "Transmissão", f: "alex.jpg"},
                 {n: "Kleber Lucas Pimenta Souza", a: "Projeção", f: "kleber.jpg"},
-                {n: "Geovana Rodrigues dos Santos Costa", a: "Iluminação", f: "geovana.jpg"},
-                {n: "Alessandro dos Santos da Silva", a: "Transmissão", f: "alessandro.jpg"},
-                {n: "Ruan Bernado Barbosa", a: "Suporte", f: "ruan.jpg"},
+                {n: "Geovana Rodrigues dos Santos Costa", a: "Projeção", f: "geovana.jpg"},
+                {n: "Alessandro dos Santos da Silva", a: "Iluminação", f: "alessandro.jpg"},
+                {n: "Ruan Bernado Barbosa", a: "Transmissão", f: "ruan.jpg"},
                 {n: "Maria Eduarda Barbosa dos Santos", a: "Projeção", f: "maria.jpg"},
-                {n: "Isabelly da Silva Rosa Pereira", a: "Iluminação", f: "isabelly.jpg"}
+                {n: "Isabelly da Silva Rosa Pereira", a: "Projeção", f: "isabelly.jpg"}
             ];
             db.voluntarios = lista.map((v, i) => ({
                 id: i + 1, nome: v.n, area: v.a, tel: "27999999999", 
-                foto: `img/${v.f}`, humor: 5, servicos: Math.floor(Math.random() * 10)
+                foto: `img/${v.f}`, 
+                nascimento: `2000-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-15`
             }));
-            log("Sistema", "Base Elite Carregada");
+            db.historico = [];
+            db.escalas = [];
+            log("Sistema", "Base Elite 3.2 Iniciada");
             save();
         }
 
-        function save() { localStorage.setItem('mediaflow_elite_v1', JSON.stringify(db)); updateUI(); }
+        function save() { localStorage.setItem('mediaflow_elite_v32', JSON.stringify(db)); updateUI(); }
+
+        /* --- SEARCH AND CONFIRMATION LOGIC --- */
+        function filterNames() {
+            const term = document.getElementById('search-name-input').value.toLowerCase();
+            const container = document.getElementById('name-grid-container');
+            container.innerHTML = '';
+
+            const filtered = db.voluntarios.filter(v => v.nome.toLowerCase().includes(term));
+
+            if(filtered.length === 0) {
+                container.innerHTML = '<p style="color:#94a3b8; width:100%; text-align:center">Ninguém encontrado.</p>';
+                return;
+            }
+
+            filtered.forEach(v => {
+                const btn = document.createElement('div');
+                btn.className = `name-btn ${selectedUserIdForConfirm === v.id ? 'selected' : ''}`;
+                btn.onclick = () => selectUserForConfirm(v.id);
+                btn.innerHTML = `
+                    <img src="${v.foto}" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}'">
+                    <span>${v.nome.split(' ')[0]}<br><small style="font-weight:400">${v.nome.split(' ').pop()}</small></span>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectUserForConfirm(id) {
+            selectedUserIdForConfirm = id;
+            filterNames(); // Re-render to show selection highlight
+            
+            const user = db.voluntarios.find(v => v.id === id);
+            document.getElementById('selected-user-name').innerText = `Olá, ${user.nome.split(' ')[0]}!`;
+            document.getElementById('confirm-results').style.display = 'block';
+            
+            loadUserScales(id);
+        }
+
+        function loadUserScales(myId) {
+            const container = document.getElementById('scale-list-container');
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            const myScales = db.escalas.filter(e => {
+                const date = new Date(e.data);
+                const isInScale = Object.entries(e.time).some(([role, vid]) => vid == myId);
+                return isInScale && date >= today;
+            }).sort((a,b) => new Date(a.data) - new Date(b.data));
+
+            if(myScales.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:30px; background:white; border-radius:20px; box-shadow:var(--shadow)">
+                        <h3>Tudo limpo!</h3>
+                        <p>Você não tem escalas pendentes.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = myScales.map(e => {
+                const role = Object.keys(e.time).find(key => e.time[key] == myId);
+                const currentStatus = e.status[role];
+                
+                let btnText = "CONFIRMAR PRESENÇA";
+                let btnColor = "var(--success)";
+                let disabled = "";
+                let statusIcon = "<span style='color:var(--warning); font-weight:800'>Pendente</span>";
+
+                if(currentStatus === 'confirmed') {
+                    btnText = "VOCÊ CONFIRMOU ✅";
+                    disabled = "disabled";
+                    statusIcon = "<span style='color:var(--success); font-weight:800'>Confirmado</span>";
+                } else if(currentStatus === 'declined') {
+                    btnText = "VOCÊ RECUSOU ❌";
+                    btnColor = "var(--danger)";
+                    disabled = "disabled";
+                    statusIcon = "<span style='color:var(--danger); font-weight:800'>Recusado</span>";
+                }
+
+                return `
+                <div class="my-scale-card">
+                    <div>
+                        <div style="font-size:0.8rem; color:var(--text-muted); font-weight:700">${new Date(e.data).toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long'})}</div>
+                        <h2 style="margin:5px 0">${e.tipo}</h2>
+                        <div style="display:flex; gap:10px; align-items:center">
+                            <span class="badge area-${db.voluntarios.find(v=>v.id==myId).area.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${role.toUpperCase()}</span>
+                            ${statusIcon}
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-confirm-big" style="background:${btnColor}" ${disabled} onclick="userConfirm(${e.id}, '${role}')">
+                    ${btnText}
+                </button>
+                <div style="margin-bottom:30px; text-align:center">
+                    ${currentStatus === 'pending' ? `<small style="color:#ef4444; cursor:pointer; text-decoration:underline" onclick="userDecline(${e.id}, '${role}')">Não posso ir (Recusar)</small>` : ''}
+                </div>
+                `;
+            }).join('');
+        }
+
+        function userConfirm(eid, role) {
+            const esc = db.escalas.find(e => e.id === eid);
+            if(esc) {
+                esc.status[role] = 'confirmed';
+                const v = db.voluntarios.find(x => x.id == esc.time[role]);
+                log("Confirmação", `${v.nome.split(' ')[0]} confirmou presença.`);
+                save();
+                loadUserScales(v.id);
+                alert("Presença Confirmada!");
+            }
+        }
+
+        function userDecline(eid, role) {
+            if(confirm("Tem certeza que deseja recusar?")) {
+                const esc = db.escalas.find(e => e.id === eid);
+                if(esc) {
+                    esc.status[role] = 'declined';
+                    const v = db.voluntarios.find(x => x.id == esc.time[role]);
+                    log("Confirmação", `${v.nome.split(' ')[0]} recusou escala.`);
+                    save();
+                    loadUserScales(v.id);
+                }
+            }
+        }
+
+        /* --- SISTEMA DE SENHA --- */
+        function verifyAdmin(actionModalId, extraData = null) {
+            document.getElementById('input-senha').value = '';
+            document.getElementById('modal-senha').showModal();
+            pendingAction = { id: actionModalId, data: extraData };
+        }
+
+        function addPass(num) {
+            const inp = document.getElementById('input-senha');
+            if(inp.value.length < 6) inp.value += num;
+        }
+        function clearPass() { document.getElementById('input-senha').value = ''; }
+
+        function checkPass() {
+            const pass = document.getElementById('input-senha').value;
+            // SENHA NUMÉRICA: 123456
+            if(pass === '123456') {
+                document.getElementById('modal-senha').close();
+                if(pendingAction) {
+                    if(pendingAction.id === 'modal-troca') {
+                        execOpenTroca(pendingAction.data.eid, pendingAction.data.role);
+                    } else {
+                        if(pendingAction.id === 'modal-escala') { fillSelects(); toggleSuporteField(); }
+                        if(pendingAction.id === 'delete-v') {
+                            if(confirm("Confirma remoção do voluntário?")) {
+                                db.voluntarios = db.voluntarios.filter(v => v.id !== pendingAction.data.id);
+                                save();
+                            }
+                        } else {
+                            document.getElementById(pendingAction.id).showModal();
+                        }
+                    }
+                }
+            } else {
+                alert("Senha Incorreta!");
+                clearPass();
+            }
+        }
 
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
@@ -294,46 +597,45 @@
             if(window.innerWidth <= 768) toggleMenu();
         }
 
-        function openModal(id) { 
-            if(id === 'modal-escala') fillSelects();
-            document.getElementById(id).showModal(); 
-        }
-        function closeModal(id) { document.getElementById(id).close(); }
-
-        function fillSelects() {
-            const map = { 'sel-projecao': 'Projeção', 'sel-iluminacao': 'Iluminação', 'sel-transmissao': 'Transmissão', 'sel-suporte': 'Suporte' };
-            for (let id in map) {
-                const el = document.getElementById(id);
-                el.innerHTML = '<option value="">Selecione...</option>';
-                db.voluntarios.filter(v => v.area === map[id]).forEach(v => {
-                    el.innerHTML += `<option value="${v.id}">${v.nome}</option>`;
-                });
-            }
-        }
-
+        /* --- DASHBOARD E ANIVERSARIANTES --- */
         function updateUI() {
-            // Stats
             document.getElementById('count-v').innerText = db.voluntarios.length;
-            const avg = db.voluntarios.length ? (db.voluntarios.reduce((a,b) => a + b.humor, 0) / db.voluntarios.length).toFixed(1) : 0;
-            document.getElementById('count-h').innerText = avg;
+            document.getElementById('count-e').innerText = db.escalas.length;
 
-            // Next Event
             const next = db.escalas.filter(e => new Date(e.data) >= new Date().setHours(0,0,0,0)).sort((a,b) => new Date(a.data) - new Date(b.data))[0];
             if(next) {
                 document.getElementById('next-date').innerText = new Date(next.data).toLocaleDateString('pt-BR', {day:'2-digit', month:'short'});
                 document.getElementById('next-type').innerText = next.tipo;
+            } else {
+                document.getElementById('next-date').innerText = "Sem Escalas";
+                document.getElementById('next-type').innerText = "Agende um evento.";
             }
 
-            // Ranking
-            const ranking = [...db.voluntarios].sort((a,b) => b.servicos - a.servicos).slice(0, 3);
-            document.getElementById('ranking-list').innerHTML = ranking.map((v, i) => `
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                    <div style="width:25px; font-weight:800; color:var(--primary)">#${i+1}</div>
-                    <img src="${v.foto}" style="width:35px; height:35px; border-radius:50%; object-fit:cover" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}'">
-                    <div style="flex:1; font-size:0.9rem"><b>${v.nome}</b></div>
-                    <div class="badge area-${v.area.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${v.servicos} cultos</div>
-                </div>
-            `).join('');
+            // Aniversariantes do Mês
+            const currentMonth = new Date().getMonth(); 
+            const bdayPeople = db.voluntarios.filter(v => {
+                if(!v.nascimento) return false;
+                const month = parseInt(v.nascimento.split('-')[1]) - 1;
+                return month === currentMonth;
+            }).sort((a,b) => parseInt(a.nascimento.split('-')[2]) - parseInt(b.nascimento.split('-')[2]));
+
+            const bdayList = document.getElementById('birthday-list');
+            if(bdayPeople.length === 0) {
+                bdayList.innerHTML = '<p style="color:#94a3b8; text-align:center">Nenhum aniversariante este mês.</p>';
+            } else {
+                bdayList.innerHTML = bdayPeople.map(v => {
+                    const [ano, mes, dia] = v.nascimento.split('-');
+                    return `
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:#f8fafc; border-radius:12px;">
+                        <img src="${v.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}'">
+                        <div style="flex:1">
+                            <div style="font-weight:700; font-size:0.9rem">${v.nome}</div>
+                            <div style="font-size:0.8rem; color:var(--primary)">Dia ${dia}</div>
+                        </div>
+                        <i class="fas fa-birthday-cake" style="color:var(--warning)"></i>
+                    </div>`;
+                }).join('');
+            }
 
             renderVoluntarios();
             renderEscalas();
@@ -342,24 +644,100 @@
 
         function renderVoluntarios() {
             const list = document.getElementById('lista-v');
-            list.innerHTML = db.voluntarios.map(v => `
-                <div class="v-card">
-                    <div class="rank">${v.servicos} pts</div>
-                    <img src="${v.foto}" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}&background=random'">
-                    <h4 style="margin:0">${v.nome.split(' ')[0]}</h4>
-                    <p class="badge area-${v.area.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">${v.area}</p>
-                    <div style="margin-top:10px">
-                        <button class="btn btn-sm btn-danger" onclick="deleteV(${v.id})"><i class="fas fa-trash"></i></button>
-                        <button class="btn btn-sm btn-whatsapp" onclick="window.open('https://wa.me/55${v.tel}')"><i class="fab fa-whatsapp"></i></button>
-                    </div>
+            const areas = ["Projeção", "Iluminação", "Transmissão", "Suporte"];
+            
+            list.innerHTML = areas.map(area => `
+                <div style="grid-column: 1/-1; margin-top:20px; border-bottom: 2px solid #e2e8f0; padding-bottom:5px">
+                    <h3 style="margin:0; color:var(--primary)">${area}</h3>
                 </div>
+                ${db.voluntarios.filter(v => v.area === area).map(v => {
+                    let nascFmt = "---";
+                    if(v.nascimento) {
+                        const [ano, mes, dia] = v.nascimento.split('-');
+                        nascFmt = `${dia}/${mes}`;
+                    }
+                    return `
+                    <div class="v-card">
+                        <img src="${v.foto}" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}&background=random'">
+                        <h4 style="margin:5px 0 0 0; font-size:0.95rem">${v.nome}</h4>
+                        <small style="color:var(--text-muted); margin-bottom:5px">${v.area}</small>
+                        <div style="font-size:0.8rem; background:#f1f5f9; padding:4px 8px; border-radius:8px; margin-top:5px">
+                            🎂 ${nascFmt}
+                        </div>
+                        <div style="margin-top:10px; width:100%; display:flex; justify-content:center; gap:5px">
+                            <button class="btn btn-sm btn-danger" onclick="verifyAdmin('delete-v', {id: ${v.id}})" title="Remover"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-whatsapp" onclick="window.open('https://wa.me/55${v.tel}')"><i class="fab fa-whatsapp"></i></button>
+                        </div>
+                    </div>
+                `}).join('')}
             `).join('');
         }
 
+        function addVoluntario() {
+            const nome = document.getElementById('v-nome').value;
+            const nasc = document.getElementById('v-nasc').value;
+            const tel = document.getElementById('v-tel').value;
+            const area = document.getElementById('v-area').value;
+            
+            if(!nome) return alert("Nome é obrigatório");
+            if(!nasc) return alert("Data de nascimento é obrigatória");
+            
+            db.voluntarios.push({
+                id: Date.now(), nome, tel, area, nascimento: nasc,
+                foto: `https://ui-avatars.com/api/?name=${nome}&background=random`
+            });
+            log("Sistema", `Novo voluntário: ${nome}`);
+            closeModal('modal-voluntario');
+            save();
+        }
+
+        /* --- ESCALA E TROCA --- */
         function renderEscalas() {
             const list = document.getElementById('lista-escalas');
             list.innerHTML = db.escalas.sort((a,b) => new Date(b.data) - new Date(a.data)).map(e => {
-                const getV = (id) => db.voluntarios.find(v => v.id == id) || {nome: 'Vazio', foto: ''};
+                const safeStatus = e.status || {}; 
+                const getSlotHTML = (role, vid, isExternal, status) => {
+                    let nome = 'Vazio';
+                    let foto = 'https://ui-avatars.com/api/?name=?&background=ddd';
+                    
+                    if(vid) {
+                        if(isExternal) {
+                            nome = vid + " (Ext)";
+                            foto = 'https://ui-avatars.com/api/?name=' + vid + '&background=f59e0b&color=fff';
+                        } else {
+                            const v = db.voluntarios.find(x => x.id == vid);
+                            if(v) { nome = v.nome.split(' ')[0]; foto = v.foto; }
+                        }
+                    }
+
+                    let stClass = 'status-pending';
+                    let icon = 'fa-clock';
+                    if(status === 'confirmed') { stClass = 'status-confirmed'; icon = 'fa-check'; }
+                    if(status === 'declined') { stClass = 'status-declined'; icon = 'fa-times'; }
+
+                    return `
+                        <div class="slot ${stClass}">
+                            <img src="${foto}" onerror="this.src='https://ui-avatars.com/api/?name=${nome}'">
+                            <div style="flex:1">
+                                <small style="text-transform:uppercase; font-size:0.6rem; font-weight:800; color:var(--primary)">${role}</small>
+                                <div style="font-size:0.85rem; font-weight:700">${nome}</div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:5px; align-items:center">
+                                <i class="fas ${icon}" style="color:var(--text-muted); opacity:0.5"></i>
+                                <i class="fas fa-exchange-alt" style="color:#cbd5e1; cursor:pointer; font-size:0.8rem" onclick="verifyAdmin('modal-troca', {eid: ${e.id}, role: '${role}'})" title="Trocar (Senha)"></i>
+                            </div>
+                        </div>
+                    `;
+                };
+
+                let slots = '';
+                ['projecao','iluminacao','transmissao'].forEach(r => {
+                    slots += getSlotHTML(r, e.time[r], false, safeStatus[r] || 'pending');
+                });
+                if(e.time.suporte) {
+                    slots += getSlotHTML('suporte', e.time.suporte, e.isSuporteExterno, safeStatus.suporte || 'pending');
+                }
+
                 return `
                     <div class="card escala-card">
                         <div style="display:flex; justify-content:space-between; align-items:start">
@@ -367,22 +745,13 @@
                                 <h3 style="margin:0">${new Date(e.data).toLocaleDateString('pt-BR')}</h3>
                                 <p style="margin:0; color:var(--text-muted); font-weight:600">${e.tipo}</p>
                             </div>
-                            <button class="btn btn-sm btn-primary" onclick="copyEscala(${e.id})"><i class="fas fa-share-nodes"></i></button>
+                            <div>
+                                <button class="btn btn-sm btn-primary" onclick="copyEscala(${e.id})"><i class="fas fa-share-nodes"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteEscala(${e.id})"><i class="fas fa-trash"></i></button>
+                            </div>
                         </div>
                         <div class="escala-grid">
-                            ${['projecao','iluminacao','transmissao','suporte'].map(role => {
-                                const v = getV(e.time[role]);
-                                return `
-                                    <div class="slot">
-                                        <img src="${v.foto}" onerror="this.src='https://ui-avatars.com/api/?name=?&background=ddd'">
-                                        <div style="flex:1">
-                                            <small style="text-transform:uppercase; font-size:0.6rem; font-weight:800; color:var(--primary)">${role}</small>
-                                            <div style="font-size:0.85rem; font-weight:700">${v.nome.split(' ')[0]}</div>
-                                        </div>
-                                        <i class="fas fa-exchange-alt" style="color:#cbd5e1; cursor:pointer" onclick="openTroca(${e.id}, '${role}')"></i>
-                                    </div>
-                                `;
-                            }).join('')}
+                            ${slots}
                         </div>
                     </div>
                 `;
@@ -391,69 +760,160 @@
 
         function addEscala() {
             const data = document.getElementById('e-data').value;
-            const tipo = document.getElementById('e-tipo').value;
+            const titulo = document.getElementById('e-tipo').value;
+            const categoria = document.getElementById('e-categoria').value;
+            
             if(!data) return alert("Insira a data");
+
             const time = {
                 projecao: document.getElementById('sel-projecao').value,
                 iluminacao: document.getElementById('sel-iluminacao').value,
                 transmissao: document.getElementById('sel-transmissao').value,
-                suporte: document.getElementById('sel-suporte').value
+                suporte: null
             };
-            db.escalas.push({ id: Date.now(), data, tipo, time });
-            // Incrementar serviços dos voluntários escalados
-            Object.values(time).forEach(id => {
-                const v = db.voluntarios.find(x => x.id == id);
-                if(v) v.servicos++;
+
+            const status = { projecao: 'pending', iluminacao: 'pending', transmissao: 'pending', suporte: 'pending' };
+            let isSuporteExterno = false;
+
+            if(categoria === 'especial') {
+                const isExt = document.getElementById('check-externo').checked;
+                if(isExt) {
+                    time.suporte = document.getElementById('inp-suporte-ext').value || "Convidado";
+                    isSuporteExterno = true;
+                } else {
+                    time.suporte = document.getElementById('sel-suporte').value;
+                }
+            }
+
+            db.escalas.push({ 
+                id: Date.now(), data, tipo: titulo || "Culto", 
+                categoria, time, status, isSuporteExterno 
             });
-            log("Escala", `Nova escala: ${tipo}`);
+
+            log("Escala", `Nova escala criada: ${titulo} (${categoria})`);
             closeModal('modal-escala');
             save();
         }
 
-        function openTroca(eid, role) {
+        function execOpenTroca(eid, role) {
             currentSwapData = { eid, role };
             const areaMap = { projecao: 'Projeção', iluminacao: 'Iluminação', transmissao: 'Transmissão', suporte: 'Suporte' };
-            document.getElementById('troca-desc').innerText = `Trocar voluntário de ${areaMap[role]}`;
+            document.getElementById('troca-desc').innerText = `Trocar voluntário de ${areaMap[role] || role}`;
+            
             const sel = document.getElementById('sel-troca');
             sel.innerHTML = '<option value="">Selecionar...</option>';
-            db.voluntarios.filter(v => v.area === areaMap[role]).forEach(v => {
+            
+            const filtroArea = (role === 'suporte') ? 'Suporte' : areaMap[role];
+            
+            db.voluntarios.filter(v => v.area === filtroArea).forEach(v => {
                 sel.innerHTML += `<option value="${v.id}">${v.nome}</option>`;
             });
-            openModal('modal-troca');
+            document.getElementById('modal-troca').showModal();
         }
 
         function confirmTroca() {
             const nid = document.getElementById('sel-troca').value;
             const esc = db.escalas.find(e => e.id === currentSwapData.eid);
+            
             if(esc && nid) {
+                if(currentSwapData.role === 'suporte') esc.isSuporteExterno = false;
+                if(!esc.status) esc.status = {};
+
+                const novoMembro = db.voluntarios.find(v => v.id == nid);
                 esc.time[currentSwapData.role] = nid;
-                log("Sistema", "Troca efetuada na escala");
+                esc.status[currentSwapData.role] = 'pending'; 
+
+                log("Troca", `Troca em ${esc.tipo}: Entrou ${novoMembro.nome}`);
                 save();
                 closeModal('modal-troca');
             }
         }
 
+        function deleteEscala(id) {
+            if(confirm('Excluir esta escala?')) {
+                db.escalas = db.escalas.filter(e => e.id !== id);
+                log("Escala", "Escala excluída");
+                save();
+            }
+        }
+
+        function openModal(id) { document.getElementById(id).showModal(); }
+        function closeModal(id) { document.getElementById(id).close(); }
+
+        function toggleSuporteField() {
+            const cat = document.getElementById('e-categoria').value;
+            const wrap = document.getElementById('wrapper-suporte');
+            wrap.style.display = (cat === 'especial') ? 'block' : 'none';
+        }
+
+        function toggleInputSuporte() {
+            const isExterno = document.getElementById('check-externo').checked;
+            document.getElementById('sel-suporte').style.display = isExterno ? 'none' : 'block';
+            document.getElementById('inp-suporte-ext').style.display = isExterno ? 'block' : 'none';
+        }
+
+        function fillSelects() {
+            const map = { 'sel-projecao': 'Projeção', 'sel-iluminacao': 'Iluminação', 'sel-transmissao': 'Transmissão', 'sel-suporte': 'Suporte' };
+            for (let id in map) {
+                const el = document.getElementById(id);
+                if(!el) continue;
+                el.innerHTML = '<option value="">Selecione...</option>';
+                db.voluntarios.filter(v => v.area === map[id]).forEach(v => {
+                    el.innerHTML += `<option value="${v.id}">${v.nome}</option>`;
+                });
+            }
+        }
+
         function copyEscala(id) {
             const e = db.escalas.find(x => x.id === id);
-            const getV = (vid) => db.voluntarios.find(x => x.id == vid)?.nome || 'A definir';
-            const txt = `*MEDIAFLOW - ESCALA*\n📅 ${new Date(e.data).toLocaleDateString()}\n☁️ ${e.tipo}\n\n🖥️ Proj: ${getV(e.time.projecao)}\n💡 Luz: ${getV(e.time.iluminacao)}\n📡 Cam: ${getV(e.time.transmissao)}\n🏃 Sup: ${getV(e.time.suporte)}`;
-            navigator.clipboard.writeText(txt).then(() => alert("Texto copiado para o WhatsApp!"));
+            const safeStatus = e.status || {};
+            
+            const getVName = (role) => {
+                if(role === 'suporte' && e.isSuporteExterno) return e.time.suporte + " (Convidado)";
+                const vid = e.time[role];
+                const v = db.voluntarios.find(x => x.id == vid);
+                let st = '';
+                if(safeStatus[role] === 'confirmed') st = ' ✅';
+                if(safeStatus[role] === 'declined') st = ' ❌';
+                return (v ? v.nome : 'A definir') + st;
+            };
+
+            let txt = `*MEDIAFLOW - ESCALA*\n📅 ${new Date(e.data).toLocaleDateString()}\n☁️ ${e.tipo}\n\n`;
+            txt += `🖥️ Proj: ${getVName('projecao')}\n`;
+            txt += `💡 Luz: ${getVName('iluminacao')}\n`;
+            txt += `📡 Cam: ${getVName('transmissao')}\n`;
+            if(e.time.suporte) txt += `🏃 Sup: ${getVName('suporte')}\n`;
+            
+            navigator.clipboard.writeText(txt).then(() => alert("Copiado para o WhatsApp!"));
         }
 
         function log(tipo, msg) {
             db.historico.unshift({ t: tipo, m: msg, d: new Date().toLocaleString('pt-BR') });
-            if(db.historico.length > 30) db.historico.pop();
+            if(db.historico.length > 50) db.historico.pop();
         }
 
         function renderLog() {
             const f = document.getElementById('filter-log').value;
             const container = document.getElementById('log-list');
-            container.innerHTML = db.historico.filter(h => f === 'Tudo' || h.t === f).map(h => `
+            
+            const filtered = db.historico.filter(h => f === 'Tudo' || h.t === f);
+            
+            if(filtered.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px">Nenhum registro.</p>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(h => {
+                let color = 'var(--primary)';
+                if(h.t === 'Troca') color = 'var(--warning)';
+                if(h.t === 'Confirmação') color = 'var(--success)';
+                
+                return `
                 <div style="padding:10px; border-bottom:1px solid #f1f5f9; font-size:0.8rem">
-                    <span style="font-weight:800; color:var(--primary)">${h.t}</span>: ${h.m} <br>
+                    <span style="font-weight:800; color:${color}">${h.t}</span>: ${h.m} <br>
                     <small style="color:var(--text-muted)">${h.d}</small>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function exportData() {
