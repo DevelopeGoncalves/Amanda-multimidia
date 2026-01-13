@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MediaFlow Elite 3.2</title>
+    <title>MediaFlow Elite 3.3</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -73,41 +73,52 @@
         .slot { 
             background: #f8fafc; padding: 12px; border-radius: 18px; display: flex; align-items: center; gap: 12px; 
             border: 1px solid #e2e8f0; position: relative; transition: 0.3s;
-            color: var(--text-main) !important; 
+            color: var(--text-main) !important;
         }
-        .slot div { color: var(--text-main) !important; }
+        .slot div { color: var(--text-main) !important; } /* Força cor preta no texto */
+        
         .slot.status-confirmed { border-color: var(--success); background: #ecfdf5; }
         .slot.status-declined { border-color: var(--danger); background: #fef2f2; opacity: 0.7; }
+        
         .slot img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #ddd; }
         
-        /* --- ÁREA DE CONFIRMAÇÃO (SEARCH) --- */
-        .confirm-container { max-width: 800px; margin: 0 auto; text-align: center; }
+        /* --- CONFIRMAÇÃO (NOVO MURAL DE ROSTOS) --- */
+        .confirm-container { max-width: 900px; margin: 0 auto; text-align: center; }
         
-        /* Search Box Styles */
-        .search-wrapper { position: relative; margin-bottom: 20px; }
+        /* Barra de Pesquisa */
+        .search-wrapper { position: relative; margin-bottom: 30px; max-width: 500px; margin-left: auto; margin-right: auto; }
         .search-wrapper i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2rem; }
         .search-input { 
-            width: 100%; padding: 18px 18px 18px 55px; border-radius: 16px; border: 2px solid #e2e8f0; 
-            font-size: 1.1rem; outline: none; transition: 0.3s; background: white;
+            width: 100%; padding: 18px 18px 18px 55px; border-radius: 50px; border: 2px solid #e2e8f0; 
+            font-size: 1.1rem; outline: none; transition: 0.3s; background: white; box-shadow: var(--shadow);
         }
-        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
+        .search-input:focus { border-color: var(--primary); transform: scale(1.02); }
 
-        /* Grid de Nomes para Seleção */
-        .name-grid { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-            gap: 15px; margin-bottom: 30px; max-height: 220px; overflow-y: auto; padding: 5px;
+        /* Grid de Rostos */
+        .faces-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+            gap: 20px; padding: 10px; margin-bottom: 40px;
         }
-        .name-btn {
-            background: white; border: 2px solid transparent; border-radius: 16px; padding: 15px;
-            cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-        }
-        .name-btn img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #eee; }
-        .name-btn span { font-weight: 700; font-size: 0.85rem; line-height: 1.2; color: var(--text-main); }
         
-        .name-btn:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-        .name-btn.selected { border-color: var(--success); background: #f0fdf4; transform: scale(0.98); }
+        .face-card {
+            background: white; border-radius: 20px; padding: 15px; cursor: pointer;
+            transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; align-items: center; gap: 10px;
+            border: 3px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .face-card img { 
+            width: 70px; height: 70px; border-radius: 50%; object-fit: cover; 
+            border: 3px solid #f1f5f9; transition: 0.2s; 
+        }
+        .face-card span { font-weight: 700; font-size: 0.85rem; line-height: 1.2; color: var(--text-main); }
+        
+        .face-card:hover { transform: translateY(-5px); }
+        .face-card.selected { 
+            border-color: var(--success); background: #f0fdf4; transform: scale(1.05); 
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        }
+        .face-card.selected img { border-color: var(--success); }
 
+        /* Cards de Escala do Usuário */
         .my-scale-card { 
             background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; 
             display: flex; align-items: center; justify-content: space-between;
@@ -116,8 +127,10 @@
         .btn-confirm-big {
             background: var(--success); color: white; width: 100%; padding: 15px; border-radius: 12px;
             font-size: 1rem; font-weight: 800; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: 0.2s;
         }
-        .btn-confirm-big:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-confirm-big:active { transform: scale(0.98); }
+        .btn-confirm-big:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
 
         /* --- MODAL SENHA --- */
         .password-display { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
@@ -139,6 +152,7 @@
             .grid-stats { grid-template-columns: 1fr 1fr; }
             .main { padding: 15px; }
             .escala-grid { grid-template-columns: 1fr; }
+            .faces-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
         }
 
         .overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 1000; }
@@ -223,21 +237,21 @@
 
         <section id="confirmacao" class="content-section" style="display:none">
             <div class="confirm-container">
-                <div style="margin-bottom: 20px;">
-                    <h2><i class="fas fa-check-double" style="color:var(--success)"></i> Confirme sua Presença</h2>
-                    <p style="color:var(--text-muted)">Digite seu nome ou clique na sua foto abaixo.</p>
+                <div style="margin-bottom: 25px;">
+                    <h2><i class="fas fa-check-circle" style="color:var(--success)"></i> Quem é você?</h2>
+                    <p style="color:var(--text-muted)">Clique na sua foto para ver suas escalas.</p>
                 </div>
                 
                 <div class="search-wrapper">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="search-name-input" class="search-input" placeholder="Digite seu nome..." onkeyup="filterNames()">
+                    <input type="text" id="search-faces" class="search-input" placeholder="Buscar meu nome..." onkeyup="renderFaceGrid()">
                 </div>
 
-                <div id="name-grid-container" class="name-grid">
+                <div id="faces-grid-container" class="faces-grid">
                     </div>
 
-                <div id="confirm-results" style="text-align: left; margin-top: 30px; border-top: 2px dashed #e2e8f0; padding-top: 20px; display: none;">
-                    <h3 id="selected-user-name" style="color:var(--primary); text-align:center"></h3>
+                <div id="confirm-results" style="text-align: left; margin-top: 30px; display: none; animation: fadeIn 0.5s;">
+                    <h3 id="selected-user-name" style="color:var(--primary); text-align:center; margin-bottom:20px;"></h3>
                     <div id="scale-list-container"></div>
                 </div>
             </div>
@@ -290,11 +304,9 @@
             <option value="especial">Evento Especial</option>
         </select>
         <input type="text" id="e-tipo" placeholder="Ex: Culto da Família">
-        
         <label>🖥️ Projeção</label><select id="sel-projecao"></select>
         <label>💡 Iluminação</label><select id="sel-iluminacao"></select>
         <label>📡 Transmissão</label><select id="sel-transmissao"></select>
-        
         <div id="wrapper-suporte" style="display:none; background:#f0f9ff; padding:10px; border-radius:12px; margin-bottom:15px; border:1px dashed #0ea5e9;">
             <label style="color:#0284c7; font-weight:800">🏃 Suporte (Evento Especial)</label>
             <div class="toggle-externo">
@@ -303,7 +315,6 @@
             <select id="sel-suporte"></select>
             <input type="text" id="inp-suporte-ext" placeholder="Nome do Convidado" style="display:none; margin-bottom:0">
         </div>
-
         <div style="display:flex; gap:10px;">
             <button class="btn btn-primary" style="flex:1" onclick="addEscala()">Salvar</button>
             <button class="btn btn-danger" style="flex:1" onclick="closeModal('modal-escala')">Sair</button>
@@ -338,7 +349,6 @@
         <h3 style="text-align:center">Área Restrita</h3>
         <p style="text-align:center; margin-bottom:10px">Digite a senha numérica:</p>
         <input type="password" id="input-senha" style="text-align:center; letter-spacing:5px; font-size:1.5rem" readonly>
-        
         <div class="password-display">
             <button class="num-btn" onclick="addPass('1')">1</button>
             <button class="num-btn" onclick="addPass('2')">2</button>
@@ -363,21 +373,19 @@
         let selectedUserIdForConfirm = null;
 
         window.onload = () => {
-            const saved = localStorage.getItem('mediaflow_elite_v32');
+            const saved = localStorage.getItem('mediaflow_elite_v33'); 
             if(saved) {
                 db = JSON.parse(saved);
             } else {
-                // Tenta migrar da v31
-                const old = localStorage.getItem('mediaflow_elite_v31');
+                const old = localStorage.getItem('mediaflow_elite_v32'); // Migra v32 ou anterior
                 if(old) {
                     db = JSON.parse(old);
-                    save(); // Salva no novo formato
+                    save(); 
                 } else {
                     seed();
                 }
             }
-            // Populate na inicialização
-            filterNames();
+            renderFaceGrid();
             updateUI();
         };
 
@@ -416,32 +424,33 @@
             }));
             db.historico = [];
             db.escalas = [];
-            log("Sistema", "Base Elite 3.2 Iniciada");
+            log("Sistema", "Base Elite 3.3 Iniciada");
             save();
         }
 
-        function save() { localStorage.setItem('mediaflow_elite_v32', JSON.stringify(db)); updateUI(); }
+        function save() { localStorage.setItem('mediaflow_elite_v33', JSON.stringify(db)); updateUI(); }
 
-        /* --- SEARCH AND CONFIRMATION LOGIC --- */
-        function filterNames() {
-            const term = document.getElementById('search-name-input').value.toLowerCase();
-            const container = document.getElementById('name-grid-container');
+        /* --- MURAL DE ROSTOS (FACES GRID) --- */
+        function renderFaceGrid() {
+            const term = document.getElementById('search-faces').value.toLowerCase();
+            const container = document.getElementById('faces-grid-container');
             container.innerHTML = '';
 
             const filtered = db.voluntarios.filter(v => v.nome.toLowerCase().includes(term));
-
+            
             if(filtered.length === 0) {
-                container.innerHTML = '<p style="color:#94a3b8; width:100%; text-align:center">Ninguém encontrado.</p>';
+                container.innerHTML = '<p style="color:#94a3b8; grid-column:1/-1;">Ninguém encontrado.</p>';
                 return;
             }
 
             filtered.forEach(v => {
                 const btn = document.createElement('div');
-                btn.className = `name-btn ${selectedUserIdForConfirm === v.id ? 'selected' : ''}`;
+                btn.className = `face-card ${selectedUserIdForConfirm === v.id ? 'selected' : ''}`;
                 btn.onclick = () => selectUserForConfirm(v.id);
                 btn.innerHTML = `
                     <img src="${v.foto}" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}'">
-                    <span>${v.nome.split(' ')[0]}<br><small style="font-weight:400">${v.nome.split(' ').pop()}</small></span>
+                    <span>${v.nome.split(' ')[0]}</span>
+                    <span style="font-weight:400; font-size:0.75rem">${v.nome.split(' ').pop()}</span>
                 `;
                 container.appendChild(btn);
             });
@@ -449,13 +458,15 @@
 
         function selectUserForConfirm(id) {
             selectedUserIdForConfirm = id;
-            filterNames(); // Re-render to show selection highlight
+            renderFaceGrid(); // Re-renderiza para mostrar a borda verde
             
             const user = db.voluntarios.find(v => v.id === id);
             document.getElementById('selected-user-name').innerText = `Olá, ${user.nome.split(' ')[0]}!`;
             document.getElementById('confirm-results').style.display = 'block';
             
             loadUserScales(id);
+            // Scroll suave até o resultado
+            document.getElementById('confirm-results').scrollIntoView({ behavior: 'smooth' });
         }
 
         function loadUserScales(myId) {
@@ -473,7 +484,7 @@
             if(myScales.length === 0) {
                 container.innerHTML = `
                     <div style="text-align:center; padding:30px; background:white; border-radius:20px; box-shadow:var(--shadow)">
-                        <h3>Tudo limpo!</h3>
+                        <h3>Tudo tranquilo!</h3>
                         <p>Você não tem escalas pendentes.</p>
                     </div>`;
                 return;
@@ -528,7 +539,7 @@
                 log("Confirmação", `${v.nome.split(' ')[0]} confirmou presença.`);
                 save();
                 loadUserScales(v.id);
-                alert("Presença Confirmada!");
+                // alert("Presença Confirmada!"); // Opcional, removi para ficar mais fluido
             }
         }
 
@@ -545,7 +556,7 @@
             }
         }
 
-        /* --- SISTEMA DE SENHA --- */
+        /* --- SENHA (123456) --- */
         function verifyAdmin(actionModalId, extraData = null) {
             document.getElementById('input-senha').value = '';
             document.getElementById('modal-senha').showModal();
@@ -560,7 +571,6 @@
 
         function checkPass() {
             const pass = document.getElementById('input-senha').value;
-            // SENHA NUMÉRICA: 123456
             if(pass === '123456') {
                 document.getElementById('modal-senha').close();
                 if(pendingAction) {
@@ -569,7 +579,7 @@
                     } else {
                         if(pendingAction.id === 'modal-escala') { fillSelects(); toggleSuporteField(); }
                         if(pendingAction.id === 'delete-v') {
-                            if(confirm("Confirma remoção do voluntário?")) {
+                            if(confirm("Confirma remoção?")) {
                                 db.voluntarios = db.voluntarios.filter(v => v.id !== pendingAction.data.id);
                                 save();
                             }
@@ -584,6 +594,7 @@
             }
         }
 
+        /* --- FUNÇÕES GERAIS --- */
         function toggleMenu() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
@@ -597,7 +608,6 @@
             if(window.innerWidth <= 768) toggleMenu();
         }
 
-        /* --- DASHBOARD E ANIVERSARIANTES --- */
         function updateUI() {
             document.getElementById('count-v').innerText = db.voluntarios.length;
             document.getElementById('count-e').innerText = db.escalas.length;
@@ -611,7 +621,6 @@
                 document.getElementById('next-type').innerText = "Agende um evento.";
             }
 
-            // Aniversariantes do Mês
             const currentMonth = new Date().getMonth(); 
             const bdayPeople = db.voluntarios.filter(v => {
                 if(!v.nascimento) return false;
@@ -640,6 +649,7 @@
             renderVoluntarios();
             renderEscalas();
             renderLog();
+            renderFaceGrid();
         }
 
         function renderVoluntarios() {
@@ -691,7 +701,6 @@
             save();
         }
 
-        /* --- ESCALA E TROCA --- */
         function renderEscalas() {
             const list = document.getElementById('lista-escalas');
             list.innerHTML = db.escalas.sort((a,b) => new Date(b.data) - new Date(a.data)).map(e => {
@@ -699,7 +708,6 @@
                 const getSlotHTML = (role, vid, isExternal, status) => {
                     let nome = 'Vazio';
                     let foto = 'https://ui-avatars.com/api/?name=?&background=ddd';
-                    
                     if(vid) {
                         if(isExternal) {
                             nome = vid + " (Ext)";
@@ -709,7 +717,6 @@
                             if(v) { nome = v.nome.split(' ')[0]; foto = v.foto; }
                         }
                     }
-
                     let stClass = 'status-pending';
                     let icon = 'fa-clock';
                     if(status === 'confirmed') { stClass = 'status-confirmed'; icon = 'fa-check'; }
@@ -729,7 +736,6 @@
                         </div>
                     `;
                 };
-
                 let slots = '';
                 ['projecao','iluminacao','transmissao'].forEach(r => {
                     slots += getSlotHTML(r, e.time[r], false, safeStatus[r] || 'pending');
@@ -737,7 +743,6 @@
                 if(e.time.suporte) {
                     slots += getSlotHTML('suporte', e.time.suporte, e.isSuporteExterno, safeStatus.suporte || 'pending');
                 }
-
                 return `
                     <div class="card escala-card">
                         <div style="display:flex; justify-content:space-between; align-items:start">
@@ -762,19 +767,15 @@
             const data = document.getElementById('e-data').value;
             const titulo = document.getElementById('e-tipo').value;
             const categoria = document.getElementById('e-categoria').value;
-            
             if(!data) return alert("Insira a data");
-
             const time = {
                 projecao: document.getElementById('sel-projecao').value,
                 iluminacao: document.getElementById('sel-iluminacao').value,
                 transmissao: document.getElementById('sel-transmissao').value,
                 suporte: null
             };
-
             const status = { projecao: 'pending', iluminacao: 'pending', transmissao: 'pending', suporte: 'pending' };
             let isSuporteExterno = false;
-
             if(categoria === 'especial') {
                 const isExt = document.getElementById('check-externo').checked;
                 if(isExt) {
@@ -784,12 +785,10 @@
                     time.suporte = document.getElementById('sel-suporte').value;
                 }
             }
-
             db.escalas.push({ 
                 id: Date.now(), data, tipo: titulo || "Culto", 
                 categoria, time, status, isSuporteExterno 
             });
-
             log("Escala", `Nova escala criada: ${titulo} (${categoria})`);
             closeModal('modal-escala');
             save();
@@ -799,12 +798,9 @@
             currentSwapData = { eid, role };
             const areaMap = { projecao: 'Projeção', iluminacao: 'Iluminação', transmissao: 'Transmissão', suporte: 'Suporte' };
             document.getElementById('troca-desc').innerText = `Trocar voluntário de ${areaMap[role] || role}`;
-            
             const sel = document.getElementById('sel-troca');
             sel.innerHTML = '<option value="">Selecionar...</option>';
-            
             const filtroArea = (role === 'suporte') ? 'Suporte' : areaMap[role];
-            
             db.voluntarios.filter(v => v.area === filtroArea).forEach(v => {
                 sel.innerHTML += `<option value="${v.id}">${v.nome}</option>`;
             });
@@ -814,15 +810,12 @@
         function confirmTroca() {
             const nid = document.getElementById('sel-troca').value;
             const esc = db.escalas.find(e => e.id === currentSwapData.eid);
-            
             if(esc && nid) {
                 if(currentSwapData.role === 'suporte') esc.isSuporteExterno = false;
                 if(!esc.status) esc.status = {};
-
                 const novoMembro = db.voluntarios.find(v => v.id == nid);
                 esc.time[currentSwapData.role] = nid;
                 esc.status[currentSwapData.role] = 'pending'; 
-
                 log("Troca", `Troca em ${esc.tipo}: Entrou ${novoMembro.nome}`);
                 save();
                 closeModal('modal-troca');
@@ -867,7 +860,6 @@
         function copyEscala(id) {
             const e = db.escalas.find(x => x.id === id);
             const safeStatus = e.status || {};
-            
             const getVName = (role) => {
                 if(role === 'suporte' && e.isSuporteExterno) return e.time.suporte + " (Convidado)";
                 const vid = e.time[role];
@@ -877,13 +869,11 @@
                 if(safeStatus[role] === 'declined') st = ' ❌';
                 return (v ? v.nome : 'A definir') + st;
             };
-
             let txt = `*MEDIAFLOW - ESCALA*\n📅 ${new Date(e.data).toLocaleDateString()}\n☁️ ${e.tipo}\n\n`;
             txt += `🖥️ Proj: ${getVName('projecao')}\n`;
             txt += `💡 Luz: ${getVName('iluminacao')}\n`;
             txt += `📡 Cam: ${getVName('transmissao')}\n`;
             if(e.time.suporte) txt += `🏃 Sup: ${getVName('suporte')}\n`;
-            
             navigator.clipboard.writeText(txt).then(() => alert("Copiado para o WhatsApp!"));
         }
 
@@ -895,19 +885,15 @@
         function renderLog() {
             const f = document.getElementById('filter-log').value;
             const container = document.getElementById('log-list');
-            
             const filtered = db.historico.filter(h => f === 'Tudo' || h.t === f);
-            
             if(filtered.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px">Nenhum registro.</p>';
                 return;
             }
-
             container.innerHTML = filtered.map(h => {
                 let color = 'var(--primary)';
                 if(h.t === 'Troca') color = 'var(--warning)';
                 if(h.t === 'Confirmação') color = 'var(--success)';
-                
                 return `
                 <div style="padding:10px; border-bottom:1px solid #f1f5f9; font-size:0.8rem">
                     <span style="font-weight:800; color:${color}">${h.t}</span>: ${h.m} <br>
