@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MediaFlow Elite 3.6 - Datas Editáveis</title>
+    <title>MediaFlow Elite 3.7 - Datas Corrigidas</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -197,7 +197,7 @@
         <a href="#" class="menu-btn" onclick="showSection('checklist')"><i class="fas fa-tasks"></i> Checklist</a>
         <a href="#" class="menu-btn" onclick="showSection('historico')"><i class="fas fa-history"></i> Log</a>
 
-        <a href="https://seusite.com.br" target="_blank" class="site-link-card">
+        <a href="https://developegoncalves.github.io/meu-portifolio/" target="_blank" class="site-link-card">
             <img src="img/logo.jpg" onerror="this.src='https://via.placeholder.com/50'">
             <span style="font-size:0.8rem;">Visite nosso Site</span>
             <i class="fas fa-external-link-alt" style="font-size:0.7rem; opacity:0.7"></i>
@@ -409,11 +409,9 @@
         }
 
         function seed() {
-            /* ATENÇÃO: EDITE AS DATAS ABAIXO! 
-               Formato: "AAAA-MM-DD" (Ano-Mês-Dia)
-            */
+            /* DADOS CORRIGIDOS - FORMATO AAAA-MM-DD */
             const lista = [
-                {n: "Alisson Miranda", a: "Iluminação, Suporte", f: "alisson.jpg", d: "2000-05-01"},
+                {n: "Alisson Miranda", a: "Iluminação, Suporte", f: "alisson.jpg", d: "06/05"},
                 {n: "Stefani Vieira", a: "Projeção", f: "stefani.jpg", d: "2000-01-01"},
                 {n: "Sophia Almeida de gois", a: "Projeção", f: "sophia.jpg", d: "2000-12-02"},
                 {n: "Anna Luiza Nascimento Souza", a: "Transmissão", f: "anna.jpg", d: "2000-11-03"},
@@ -424,7 +422,7 @@
                 {n: "Luiza Messa Lemos Farias", a: "Projeção", f: "luiza.jpg", d: "2000-06-08"},
                 {n: "Higor Cauã Rosa Moreira", a: "Projeção", f: "higor.jpg", d: "2000-05-09"},
                 {n: "Bryan Lucas Rodrigues de Souza", a: "Iluminação", f: "bryan.jpg", d: "2000-04-10"},
-                {n: "Alex Gonçalves Victorino", a: "Transmissão, Suporte", f: "alex.jpg", d: "1997-03-11"},
+                {n: "Alex Gonçalves Victorino", a: "Transmissão, Suporte", f: "alex.jpg", d: "2000-11-20"}, /* DATA CORRIGIDA */
                 {n: "Kleber Lucas Pimenta Souza", a: "Projeção", f: "kleber.jpg", d: "2000-02-01"},
                 {n: "Geovana Rodrigues dos Santos Costa", a: "Projeção", f: "geovana.jpg", d: "2000-01-12"},
                 {n: "Alessandro dos Santos da Silva", a: "Iluminação", f: "alessandro.jpg", d: "2000-11-01"},
@@ -432,17 +430,17 @@
                 {n: "Maria Eduarda Barbosa dos Santos", a: "Projeção", f: "maria.jpg", d: "2000-02-01"},
                 {n: "Isabelly da Silva Rosa Pereira", a: "Projeção", f: "isabelly.jpg", d: "2000-02-01"},
                 {n: "Amanda Pereira da Cruz", a: "Suporte", f: "amanda.jpg", d: "2000-01-01"},
-                {n: "Dhow Santos de Oliveira", a: "Iluminação, Suporte", f: "dhow.jpg", d: "2000-01-01"}
+                {n: "Dhow Santos de Oliveira", a: "Projeção, Suporte", f: "dhow.jpg", d: "2000-01-01"}
             ];
             
             db.voluntarios = lista.map((v, i) => ({
                 id: i + 1, nome: v.n, area: v.a, tel: "27999999999", 
                 foto: `img/${v.f}`, 
-                nascimento: v.d // Usa a data que você definiu acima
+                nascimento: v.d 
             }));
             db.historico = [];
             db.escalas = [];
-            log("Sistema", "Base Elite 3.4 Iniciada");
+            log("Sistema", "Base Elite 3.7 Iniciada");
             save();
         }
 
@@ -681,9 +679,24 @@
             const currentMonth = new Date().getMonth(); 
             const bdayPeople = db.voluntarios.filter(v => {
                 if(!v.nascimento) return false;
-                const month = parseInt(v.nascimento.split('-')[1]) - 1;
+                // Proteção contra formatos estranhos para o cálculo do mês
+                const parts = v.nascimento.split(/[-/]/);
+                let month = -1;
+                // Se ISO (AAAA-MM-DD)
+                if(parts[0].length === 4 && parts.length === 3) month = parseInt(parts[1]) - 1;
+                // Se BR (DD/MM/AAAA ou DD/MM)
+                else if(parts.length >= 2) month = parseInt(parts[1]) - 1;
+
                 return month === currentMonth;
-            }).sort((a,b) => parseInt(a.nascimento.split('-')[2]) - parseInt(b.nascimento.split('-')[2]));
+            }).sort((a,b) => {
+                 // Ordenação por dia
+                 const getDay = (d) => {
+                    const p = d.split(/[-/]/);
+                    if(p[0].length === 4) return parseInt(p[2]); // ISO
+                    return parseInt(p[0]); // BR
+                 };
+                 return getDay(a.nascimento) - getDay(b.nascimento);
+            });
 
             const bdayList = document.getElementById('birthday-list');
             if(bdayPeople.length === 0) {
@@ -692,7 +705,12 @@
                 const bdayMsg = encodeURIComponent("Feliz Aniversário! \nQue seu novo ano seja repleto de saúde, paz e muitas alegrias!.\nDEUS ABENÇOE.");
                 
                 bdayList.innerHTML = bdayPeople.map(v => {
-                    const [ano, mes, dia] = v.nascimento.split('-');
+                    // Formatação segura para exibição
+                    let dia = '??';
+                    const p = v.nascimento.split(/[-/]/);
+                    if(p[0].length === 4) dia = p[2]; // ISO
+                    else dia = p[0]; // BR
+
                     return `
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:#f8fafc; border-radius:12px;">
                         <img src="${v.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}'">
@@ -720,11 +738,25 @@
                     <h3 style="margin:0; color:var(--primary)">${area}</h3>
                 </div>
                 ${db.voluntarios.filter(v => v.area.includes(area)).map(v => {
+                    
+                    // LÓGICA DE DATA CORRIGIDA (Robustez)
                     let nascFmt = "---";
                     if(v.nascimento) {
-                        const [ano, mes, dia] = v.nascimento.split('-');
-                        nascFmt = `${dia}/${mes}`;
+                        const parts = v.nascimento.replace(/\s/g, '').split(/[\/-]/);
+                        // Caso 1: AAAA-MM-DD
+                        if(parts[0].length === 4 && parts.length === 3) {
+                            nascFmt = `${parts[2]}/${parts[1]}`;
+                        } 
+                        // Caso 2: DD/MM/AAAA
+                        else if(parts.length === 3) {
+                            nascFmt = `${parts[0]}/${parts[1]}`;
+                        }
+                        // Caso 3: DD/MM
+                        else if(parts.length === 2) {
+                            nascFmt = `${parts[0]}/${parts[1]}`;
+                        }
                     }
+
                     return `
                     <div class="v-card">
                         <img src="${v.foto}" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}&background=random'">
