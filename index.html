@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MediaFlow Elite 3.7 - Conectado</title>
+    <title>MediaFlow Elite 3.7</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -195,15 +195,14 @@
         <a href="#" class="menu-btn btn-confirm" onclick="showSection('confirmacao')"><i class="fas fa-check-circle"></i> Confirmação</a>
         <a href="#" class="menu-btn" onclick="showSection('voluntarios')"><i class="fas fa-users"></i> Equipe</a>
         <a href="#" class="menu-btn" onclick="showSection('checklist')"><i class="fas fa-tasks"></i> Checklist</a>
-        <a href="#" class="menu-btn" onclick="showSection('historico')"><i class="fas fa-history"></i> Log</a>
+        <a href="#" class="menu-btn" onclick="showSection('historico')"><i class="fas fa-history"></i> Histórico</a>
 
         <a href="https://developegoncalves.github.io/meu-portifolio/" target="_blank" class="site-link-card">
             <img src="img/logo.jpg" onerror="this.src='https://via.placeholder.com/50'">
             <span style="font-size:0.8rem;">Visite nosso Site</span>
             <i class="fas fa-external-link-alt" style="font-size:0.7rem; opacity:0.7"></i>
         </a>
-        <button class="btn btn-sm btn-danger" style="width:100%; color:#ef4444; margin-top:10px" onclick="forceReset()"><i class="fas fa-sync"></i> Resetar App (Nuvem)</button>
-    </nav>
+        </nav>
 
     <main class="main">
         <header class="header-mobile">
@@ -294,7 +293,7 @@
 
         <section id="historico" class="content-section" style="display:none">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>Log do Sistema</h2>
+                <h2>Histórico</h2>
                 <select id="filter-log" onchange="renderLog()" style="width:120px; margin:0">
                     <option value="Tudo">Tudo</option>
                     <option value="Escala">Escalas</option>
@@ -478,12 +477,6 @@
 
         // --- FUNÇÕES EXPOSTAS PARA O HTML (window.) ---
         
-        window.forceReset = function() {
-            if(confirm("ATENÇÃO: Isso apagará tudo DO SERVIDOR para TODOS. Deseja continuar?")) {
-                seed();
-            }
-        };
-
         window.toggleMenu = function() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
