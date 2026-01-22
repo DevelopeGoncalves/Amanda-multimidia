@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MediaFlow Elite 3.7</title>
+    <title>MediaFlow Elite 3.8 - Com Edição</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -202,7 +202,7 @@
             <span style="font-size:0.8rem;">Visite nosso Site</span>
             <i class="fas fa-external-link-alt" style="font-size:0.7rem; opacity:0.7"></i>
         </a>
-        </nav>
+    </nav>
 
     <main class="main">
         <header class="header-mobile">
@@ -335,12 +335,10 @@
     <dialog id="modal-voluntario">
         <h3>Adicionar Membro</h3>
         <input type="text" id="v-nome" placeholder="Nome Completo">
-        
         <input type="text" id="v-foto-arquivo" placeholder="Nome da foto (ex: maria.jpg)">
         <small style="display:block; margin-top:-15px; margin-bottom:15px; color:#64748b; font-size:0.8rem">
             Deixe vazio para gerar imagem automática.
         </small>
-
         <label style="font-size:0.9rem; font-weight:700">Data de Nascimento:</label>
         <input type="date" id="v-nasc">
         <input type="tel" id="v-tel" placeholder="WhatsApp (DDD)">
@@ -352,6 +350,26 @@
         </select>
         <button class="btn btn-primary" style="width:100%" onclick="addVoluntario()">Cadastrar</button>
         <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="closeModal('modal-voluntario')">Cancelar</button>
+    </dialog>
+
+    <dialog id="modal-edit-voluntario">
+        <h3>Editar Membro</h3>
+        <input type="text" id="ed-nome" placeholder="Nome Completo">
+        <input type="text" id="ed-foto-arquivo" placeholder="Alterar foto (ex: novo.jpg)">
+        <small style="display:block; margin-top:-15px; margin-bottom:15px; color:#64748b; font-size:0.8rem">
+            Deixe vazio para MANTER a foto atual.
+        </small>
+        <label style="font-size:0.9rem; font-weight:700">Data de Nascimento:</label>
+        <input type="date" id="ed-nasc">
+        <input type="tel" id="ed-tel" placeholder="WhatsApp (DDD)">
+        <select id="ed-area">
+            <option value="Projeção">Projeção</option>
+            <option value="Iluminação">Iluminação</option>
+            <option value="Transmissão">Transmissão</option>
+            <option value="Suporte">Suporte</option>
+        </select>
+        <button class="btn btn-primary" style="width:100%" onclick="confirmEditVoluntario()">Salvar Alterações</button>
+        <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="closeModal('modal-edit-voluntario')">Cancelar</button>
     </dialog>
 
     <dialog id="modal-troca">
@@ -384,11 +402,9 @@
     </dialog>
 
     <script type="module">
-        // --- IMPORTAÇÕES DO FIREBASE (CDN) ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- SUAS CONFIGURAÇÕES DO FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyAI39EX4IZd3NSOkYrPLA-xZgPKJygBfvs",
             authDomain: "escala-multimidia.firebaseapp.com",
@@ -400,47 +416,39 @@
             measurementId: "G-C5CQYJQZPR"
         };
 
-        // Inicializa Firebase e Firestore
         const app = initializeApp(firebaseConfig);
         const dbFirestore = getFirestore(app);
-
-        // Referência ao documento único (Banco de Dados "Monolítico")
         const docRef = doc(dbFirestore, "mediaflow", "dados_elite_37");
 
-        // --- VARIÁVEIS GLOBAIS DO APP ---
         let db = { voluntarios: [], escalas: [], historico: [], checklist: [] };
         let currentSwapData = null;
         let pendingAction = null; 
         let selectedUserIdForConfirm = null;
+        let currentEditingId = null; // ID DO USUÁRIO SENDO EDITADO
 
-        // --- SINCRONIZAÇÃO EM TEMPO REAL (SUBSTITUI window.onload) ---
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 db = docSnap.data();
                 updateUI();
                 console.log("🔥 Dados atualizados do Firebase!");
             } else {
-                console.log("⚠️ Nenhum dado no Firebase. Criando base inicial...");
+                console.log("⚠️ Nenhum dado. Criando seed...");
                 seed();
             }
         }, (error) => {
             console.error("Erro Firebase:", error);
         });
 
-        // --- FUNÇÃO DE SALVAR (AGORA NA NUVEM) ---
         async function save() {
             try {
                 await setDoc(docRef, db);
-                // Não precisa chamar updateUI(), o onSnapshot fará isso
             } catch (e) {
                 console.error("Erro ao salvar:", e);
                 alert("Erro ao salvar na nuvem! Verifique sua internet.");
             }
         }
 
-        // --- SEED (POPULA DADOS INICIAIS) ---
         function seed() {
-            /* DADOS CORRIGIDOS - FORMATO AAAA-MM-DD */
             const lista = [
                 {n: "Alisson Miranda", a: "Iluminação, Suporte", f: "alisson.jpg", d: "12/01"},
                 {n: "Stefani Vieira", a: "Projeção", f: "stefani.jpg", d: "27/05"},
@@ -475,8 +483,12 @@
             save();
         }
 
-        // --- FUNÇÕES EXPOSTAS PARA O HTML (window.) ---
-        
+        window.forceReset = function() {
+            if(confirm("ATENÇÃO: Isso apagará tudo DO SERVIDOR para TODOS. Deseja continuar?")) {
+                seed();
+            }
+        };
+
         window.toggleMenu = function() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('overlay').classList.toggle('active');
@@ -488,11 +500,9 @@
             document.getElementById(id).style.display = 'block';
             if(event && event.currentTarget) event.currentTarget.classList.add('active');
             if(window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('active')) window.toggleMenu();
-            
             if(id === 'confirmacao') window.renderFaceGrid();
         };
 
-        // --- MURAL DE ROSTOS ---
         function getPendingVolunteersIds() {
             const today = new Date();
             today.setHours(0,0,0,0);
@@ -632,7 +642,6 @@
             }
         };
 
-        // --- SENHAS E MODAIS ---
         window.verifyAdmin = function(actionModalId, extraData = null) {
             document.getElementById('input-senha').value = '';
             document.getElementById('modal-senha').showModal();
@@ -661,6 +670,9 @@
                         fillSelects();
                         toggleSuporteField();
                         document.getElementById(pendingAction.id).showModal();
+                    } else if(pendingAction.id === 'edit-v') {
+                        // LOGICA PARA ABRIR O MODAL DE EDIÇÃO
+                        openEditVoluntario(pendingAction.data.id);
                     } else {
                         document.getElementById(pendingAction.id).showModal();
                     }
@@ -671,7 +683,6 @@
             }
         };
 
-        // --- UI GERAL ---
         function updateUI() {
             document.getElementById('count-v').innerText = db.voluntarios.length;
             document.getElementById('count-e').innerText = db.escalas.length;
@@ -749,7 +760,8 @@
                         <small style="color:var(--text-muted); margin-bottom:5px">${v.area}</small>
                         <div style="font-size:0.8rem; background:#f1f5f9; padding:4px 8px; border-radius:8px; margin-top:5px">🎂 ${nascFmt}</div>
                         <div style="margin-top:10px; width:100%; display:flex; justify-content:center; gap:5px">
-                            <button class="btn btn-sm btn-danger" onclick="verifyAdmin('delete-v', {id: ${v.id}})"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-primary" onclick="verifyAdmin('edit-v', {id: ${v.id}})" title="Editar"><i class="fas fa-pen"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="verifyAdmin('delete-v', {id: ${v.id}})" title="Remover"><i class="fas fa-trash"></i></button>
                             <button class="btn btn-sm btn-whatsapp" onclick="window.open('https://wa.me/55${v.tel}')"><i class="fab fa-whatsapp"></i></button>
                         </div>
                     </div>
@@ -762,12 +774,10 @@
             const nasc = document.getElementById('v-nasc').value;
             const tel = document.getElementById('v-tel').value;
             const area = document.getElementById('v-area').value;
-            // Pega o valor do novo campo de foto
             const arquivoFoto = document.getElementById('v-foto-arquivo').value;
 
             if(!nome || !nasc) return alert("Preencha nome e nascimento");
 
-            // Lógica: Se você digitou algo, usa a pasta img/. Se não, gera automático.
             let caminhoFoto = `https://ui-avatars.com/api/?name=${nome}&background=random`;
             if (arquivoFoto) {
                 caminhoFoto = `img/${arquivoFoto}`;
@@ -786,6 +796,51 @@
             window.closeModal('modal-voluntario');
             save();
         };
+
+        // --- FUNÇÕES DE EDIÇÃO (LÓGICA NOVA) ---
+        function openEditVoluntario(id) {
+            const v = db.voluntarios.find(x => x.id === id);
+            if (!v) return;
+
+            currentEditingId = id; // Guarda quem estamos editando
+            
+            // Preenche os campos do modal com os dados atuais
+            document.getElementById('ed-nome').value = v.nome;
+            document.getElementById('ed-nasc').value = v.nascimento; // Pode precisar de ajuste se o formato não for AAAA-MM-DD
+            document.getElementById('ed-tel').value = v.tel;
+            document.getElementById('ed-area').value = v.area.split(',')[0].trim(); // Pega a primeira área
+            document.getElementById('ed-foto-arquivo').value = ''; // Limpa para não confundir
+
+            document.getElementById('modal-edit-voluntario').showModal();
+        }
+
+        window.confirmEditVoluntario = function() {
+            const v = db.voluntarios.find(x => x.id === currentEditingId);
+            if (!v) return;
+
+            const novoNome = document.getElementById('ed-nome').value;
+            const novaData = document.getElementById('ed-nasc').value;
+            const novoTel = document.getElementById('ed-tel').value;
+            const novaArea = document.getElementById('ed-area').value;
+            const novaFotoArquivo = document.getElementById('ed-foto-arquivo').value;
+
+            if(!novoNome || !novaData) return alert("Nome e data são obrigatórios.");
+
+            // Atualiza os dados
+            v.nome = novoNome;
+            v.nascimento = novaData;
+            v.tel = novoTel;
+            v.area = novaArea;
+
+            // Se o usuário digitou uma nova foto, atualiza. Se deixou vazio, mantém a antiga.
+            if(novaFotoArquivo) {
+                v.foto = `img/${novaFotoArquivo}`;
+            }
+
+            log("Sistema", `Voluntário editado: ${novoNome}`);
+            window.closeModal('modal-edit-voluntario');
+            save(); // Salva no Firebase
+        }
 
         function renderEscalas() {
             const list = document.getElementById('lista-escalas');
