@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MediaFlow Elite 3.8 - Com Edição</title>
+    <title>MediaFlow Elite 3.9</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -136,6 +136,19 @@
         .password-display { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
         .num-btn { padding: 15px; font-size: 1.2rem; border-radius: 12px; border: 1px solid #e2e8f0; background: white; cursor: pointer; font-weight: bold; }
         .num-btn:active { background: #e2e8f0; }
+
+        /* --- CHECKBOX GROUP (EDIÇÃO) --- */
+        .checkbox-group {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc;
+            padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px;
+        }
+        .checkbox-group label {
+            display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 18px; height: 18px; margin: 0;
+        }
 
         /* --- BOTÕES GERAIS --- */
         .btn { border: none; border-radius: 14px; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; padding: 12px 20px; }
@@ -362,12 +375,15 @@
         <label style="font-size:0.9rem; font-weight:700">Data de Nascimento:</label>
         <input type="date" id="ed-nasc">
         <input type="tel" id="ed-tel" placeholder="WhatsApp (DDD)">
-        <select id="ed-area">
-            <option value="Projeção">Projeção</option>
-            <option value="Iluminação">Iluminação</option>
-            <option value="Transmissão">Transmissão</option>
-            <option value="Suporte">Suporte</option>
-        </select>
+        
+        <label style="font-size:0.9rem; font-weight:700">Áreas de Atuação (Selecione):</label>
+        <div class="checkbox-group" id="ed-area-wrapper">
+             <label><input type="checkbox" value="Projeção"> Projeção</label>
+             <label><input type="checkbox" value="Iluminação"> Iluminação</label>
+             <label><input type="checkbox" value="Transmissão"> Transmissão</label>
+             <label><input type="checkbox" value="Suporte"> Suporte</label>
+        </div>
+
         <button class="btn btn-primary" style="width:100%" onclick="confirmEditVoluntario()">Salvar Alterações</button>
         <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="closeModal('modal-edit-voluntario')">Cancelar</button>
     </dialog>
@@ -424,7 +440,7 @@
         let currentSwapData = null;
         let pendingAction = null; 
         let selectedUserIdForConfirm = null;
-        let currentEditingId = null; // ID DO USUÁRIO SENDO EDITADO
+        let currentEditingId = null;
 
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -448,38 +464,39 @@
             }
         }
 
+        // --- ATENÇÃO: COLOQUE SEUS NÚMEROS AQUI EMBAIXO EM 't' ---
         function seed() {
             const lista = [
-                {n: "Alisson Miranda", a: "Iluminação, Suporte", f: "alisson.jpg", d: "12/01"},
-                {n: "Stefani Vieira", a: "Projeção", f: "stefani.jpg", d: "27/05"},
-                {n: "Sophia Almeida de gois", a: "Projeção", f: "sophia.jpg", d: "29/10"},
-                {n: "Anna Luiza Nascimento Souza", a: "Transmissão", f: "anna.jpg", d: "05/02"},
-                {n: "Thatyla Almeida Couto", a: "Transmissão", f: "thatyla.jpg", d: "11/04"},
-                {n: "Calebe Ramos De Gois", a: "Iluminação", f: "calebe.jpg", d: "15/10"},
-                {n: "Paulo Henrique Mendes", a: "Transmissão", f: "paulo.jpg", d: "12/02"},
-                {n: "Henrique Marçal Brito", a: "Iluminação", f: "henrique.jpg", d: "26/09"},
-                {n: "Luiza Messa Lemos Farias", a: "Projeção", f: "luiza.jpg", d: "06/07"},
-                {n: "Higor Cauã Rosa Moreira", a: "Projeção", f: "higor.jpg", d: "19/08"},
-                {n: "Bryan Lucas Rodrigues de Souza", a: "Iluminação", f: "bryan.jpg", d: "29/01"},
-                {n: "Alex Gonçalves Victorino", a: "Transmissão, Suporte", f: "alex.jpg", d: "2000-11-20"}, 
-                {n: "Kleber Lucas Pimenta Souza", a: "Projeção", f: "kleber.jpg", d: "01/07"},
-                {n: "Geovana Rodrigues dos Santos Costa", a: "Projeção", f: "geovana.jpg", d: "24/01"},
-                {n: "Alessandro dos Santos da Silva", a: "Iluminação", f: "alessandro.jpg", d: "25/04"},
-                {n: "Ruan Bernado Barbosa", a: "Transmissão", f: "ruan.jpg", d: "2000-01-01"},
-                {n: "Maria Eduarda Barbosa dos Santos", a: "Projeção", f: "maria.jpg", d: "29/08"},
-                {n: "Isabelly da Silva Rosa Pereira", a: "Projeção", f: "isabelly.jpg", d: "02/05"},
-                {n: "Amanda Pereira da Cruz", a: "Suporte", f: "amanda.jpg", d: "04/01"},
-                {n: "Dhow Santos de Oliveira", a: "Projeção, Suporte", f: "dhow.jpg", d: "23/01"}
+                {n: "Alisson Miranda", a: "Iluminação, Suporte", f: "alisson.jpg", d: "12/01", t: "5527998677815"},
+                {n: "Stefani Vieira", a: "Projeção", f: "stefani.jpg", d: "27/05", t: "5527998036736"},
+                {n: "Sophia Almeida de gois", a: "Projeção", f: "sophia.jpg", d: "29/10", t: "5527998270304"},
+                {n: "Anna Luiza Nascimento Souza", a: "Transmissão", f: "anna.jpg", d: "05/02", t: "5527997407769"},
+                {n: "Thatyla Almeida Couto", a: "Transmissão", f: "thatyla.jpg", d: "11/04", t: "5527996357747"},
+                {n: "Calebe Ramos De Gois", a: "Iluminação", f: "calebe.jpg", d: "15/10", t: "5527996246252"},
+                {n: "Paulo Henrique Mendes", a: "Transmissão", f: "paulo.jpg", d: "12/02", t: "5527997518113"},
+                {n: "Henrique Marçal Brito", a: "Iluminação", f: "henrique.jpg", d: "26/09", t: "5527999347744"},
+                {n: "Luiza Messa Lemos Farias", a: "Projeção", f: "luiza.jpg", d: "06/07", t: "5527998195812"},
+                {n: "Higor Cauã Rosa Moreira", a: "Projeção", f: "higor.jpg", d: "19/08", t: "5527988634815"},
+                {n: "Bryan Lucas Rodrigues de Souza", a: "Iluminação", f: "bryan.jpg", d: "29/01", t: "5527992657890"},
+                {n: "Alex Gonçalves Victorino", a: "Transmissão, Suporte", f: "alex.jpg", d: "20/11", t: "5527999064068"},
+                {n: "Kleber Lucas Pimenta Souza", a: "Projeção", f: "kleber.jpg", d: "01/07", t: "5527997352774"},
+                {n: "Geovana Rodrigues dos Santos Costa", a: "Projeção", f: "geovana.jpg", d: "24/01", t: "5527998437345"},
+                {n: "Alessandro dos Santos da Silva", a: "Iluminação", f: "alessandro.jpg", d: "25/04", t: "5527996668133"},
+                {n: "Ruan Bernado Barbosa", a: "Transmissão", f: "ruan.jpg", d: "2000-01-01", t: "5527999776281"},
+                {n: "Maria Eduarda Barbosa dos Santos", a: "Projeção", f: "maria.jpg", d: "29/08", t: "5527998145621"},
+                {n: "Isabelly da Silva Rosa Pereira", a: "Projeção", f: "isabelly.jpg", d: "02/05", t: "5527998391120"},
+                {n: "Amanda Pereira da Cruz", a: "Suporte", f: "amanda.jpg", d: "04/01", t: "5527998360299"},
+                {n: "Dhow Santos de Oliveira", a: "Projeção, Suporte", f: "dhow.jpg", d: "23/01", t: "5527997246485"}
             ];
             
             db.voluntarios = lista.map((v, i) => ({
-                id: i + 1, nome: v.n, area: v.a, tel: "27999999999", 
+                id: i + 1, nome: v.n, area: v.a, tel: v.t, // Pega o telefone da lista acima
                 foto: `img/${v.f}`, 
                 nascimento: v.d 
             }));
             db.historico = [];
             db.escalas = [];
-            log("Sistema", "Base Elite 3.7 Iniciada (Firebase)");
+            log("Sistema", "Base Elite 3.9 Iniciada (Firebase)");
             save();
         }
 
@@ -671,7 +688,6 @@
                         toggleSuporteField();
                         document.getElementById(pendingAction.id).showModal();
                     } else if(pendingAction.id === 'edit-v') {
-                        // LOGICA PARA ABRIR O MODAL DE EDIÇÃO
                         openEditVoluntario(pendingAction.data.id);
                     } else {
                         document.getElementById(pendingAction.id).showModal();
@@ -722,6 +738,10 @@
                     const p = v.nascimento.split(/[-/]/);
                     if(p[0].length === 4) dia = p[2];
                     else dia = p[0];
+                    
+                    const primeiroNome = v.nome.split(' ')[0];
+                    const msg = encodeURIComponent(`Olá ${primeiroNome}, Feliz Aniversário! 🎉\nQue seu novo ano seja repleto de saúde, paz e muitas alegrias! DEUS ABENÇOE.`);
+                    
                     return `
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:#f8fafc; border-radius:12px;">
                         <img src="${v.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}'">
@@ -729,6 +749,7 @@
                             <div style="font-weight:700; font-size:0.9rem">${v.nome}</div>
                             <div style="font-size:0.8rem; color:var(--primary)">Dia ${dia}</div>
                         </div>
+                        <a href="https://wa.me/${v.tel}?text=${msg}" target="_blank" class="btn btn-sm btn-whatsapp" style="border-radius:50%; width:35px; height:35px; padding:0; justify-content:center"><i class="fab fa-whatsapp"></i></a>
                     </div>`;
                 }).join('');
             }
@@ -762,7 +783,7 @@
                         <div style="margin-top:10px; width:100%; display:flex; justify-content:center; gap:5px">
                             <button class="btn btn-sm btn-primary" onclick="verifyAdmin('edit-v', {id: ${v.id}})" title="Editar"><i class="fas fa-pen"></i></button>
                             <button class="btn btn-sm btn-danger" onclick="verifyAdmin('delete-v', {id: ${v.id}})" title="Remover"><i class="fas fa-trash"></i></button>
-                            <button class="btn btn-sm btn-whatsapp" onclick="window.open('https://wa.me/55${v.tel}')"><i class="fab fa-whatsapp"></i></button>
+                            <button class="btn btn-sm btn-whatsapp" onclick="window.open('https://wa.me/${v.tel}')"><i class="fab fa-whatsapp"></i></button>
                         </div>
                     </div>
                 `}).join('')}
@@ -797,20 +818,24 @@
             save();
         };
 
-        // --- FUNÇÕES DE EDIÇÃO (LÓGICA NOVA) ---
+        // --- FUNÇÕES DE EDIÇÃO COM MULTI-CATEGORIA ---
         function openEditVoluntario(id) {
             const v = db.voluntarios.find(x => x.id === id);
             if (!v) return;
 
-            currentEditingId = id; // Guarda quem estamos editando
+            currentEditingId = id;
             
-            // Preenche os campos do modal com os dados atuais
             document.getElementById('ed-nome').value = v.nome;
-            document.getElementById('ed-nasc').value = v.nascimento; // Pode precisar de ajuste se o formato não for AAAA-MM-DD
+            document.getElementById('ed-nasc').value = v.nascimento;
             document.getElementById('ed-tel').value = v.tel;
-            document.getElementById('ed-area').value = v.area.split(',')[0].trim(); // Pega a primeira área
-            document.getElementById('ed-foto-arquivo').value = ''; // Limpa para não confundir
-
+            
+            // Marca os checkboxes corretos
+            const areasAtuais = v.area.split(',').map(s => s.trim());
+            document.querySelectorAll('#ed-area-wrapper input').forEach(input => {
+                input.checked = areasAtuais.includes(input.value);
+            });
+            
+            document.getElementById('ed-foto-arquivo').value = ''; 
             document.getElementById('modal-edit-voluntario').showModal();
         }
 
@@ -821,25 +846,29 @@
             const novoNome = document.getElementById('ed-nome').value;
             const novaData = document.getElementById('ed-nasc').value;
             const novoTel = document.getElementById('ed-tel').value;
-            const novaArea = document.getElementById('ed-area').value;
             const novaFotoArquivo = document.getElementById('ed-foto-arquivo').value;
 
+            // Pega todas as áreas marcadas
+            const areasSelecionadas = [];
+            document.querySelectorAll('#ed-area-wrapper input:checked').forEach(input => {
+                areasSelecionadas.push(input.value);
+            });
+            
+            if(areasSelecionadas.length === 0) return alert("Selecione pelo menos uma área!");
             if(!novoNome || !novaData) return alert("Nome e data são obrigatórios.");
 
-            // Atualiza os dados
             v.nome = novoNome;
             v.nascimento = novaData;
             v.tel = novoTel;
-            v.area = novaArea;
+            v.area = areasSelecionadas.join(', '); // Salva como "Iluminação, Suporte"
 
-            // Se o usuário digitou uma nova foto, atualiza. Se deixou vazio, mantém a antiga.
             if(novaFotoArquivo) {
                 v.foto = `img/${novaFotoArquivo}`;
             }
 
             log("Sistema", `Voluntário editado: ${novoNome}`);
             window.closeModal('modal-edit-voluntario');
-            save(); // Salva no Firebase
+            save();
         }
 
         function renderEscalas() {
