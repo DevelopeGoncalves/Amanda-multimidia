@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MediaFlow Elite 3.7 - Datas Corrigidas</title>
+    <title>MediaFlow Elite 3.7 - Conectado</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -202,7 +202,7 @@
             <span style="font-size:0.8rem;">Visite nosso Site</span>
             <i class="fas fa-external-link-alt" style="font-size:0.7rem; opacity:0.7"></i>
         </a>
-        <button class="btn btn-sm btn-danger" style="width:100%; color:#ef4444; margin-top:10px" onclick="forceReset()"><i class="fas fa-sync"></i> Resetar App</button>
+        <button class="btn btn-sm btn-danger" style="width:100%; color:#ef4444; margin-top:10px" onclick="forceReset()"><i class="fas fa-sync"></i> Resetar App (Nuvem)</button>
     </nav>
 
     <main class="main">
@@ -336,6 +336,12 @@
     <dialog id="modal-voluntario">
         <h3>Adicionar Membro</h3>
         <input type="text" id="v-nome" placeholder="Nome Completo">
+        
+        <input type="text" id="v-foto-arquivo" placeholder="Nome da foto (ex: maria.jpg)">
+        <small style="display:block; margin-top:-15px; margin-bottom:15px; color:#64748b; font-size:0.8rem">
+            Deixe vazio para gerar imagem automática.
+        </small>
+
         <label style="font-size:0.9rem; font-weight:700">Data de Nascimento:</label>
         <input type="date" id="v-nasc">
         <input type="tel" id="v-tel" placeholder="WhatsApp (DDD)">
@@ -378,36 +384,62 @@
         <button class="btn btn-sm" onclick="closeModal('modal-senha')" style="width:100%; margin-top:15px; border:1px solid #ccc">Cancelar</button>
     </dialog>
 
-    <script>
+    <script type="module">
+        // --- IMPORTAÇÕES DO FIREBASE (CDN) ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- SUAS CONFIGURAÇÕES DO FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAI39EX4IZd3NSOkYrPLA-xZgPKJygBfvs",
+            authDomain: "escala-multimidia.firebaseapp.com",
+            databaseURL: "https://escala-multimidia-default-rtdb.firebaseio.com",
+            projectId: "escala-multimidia",
+            storageBucket: "escala-multimidia.firebasestorage.app",
+            messagingSenderId: "577468056353",
+            appId: "1:577468056353:web:18881006fbdef6c9cdf460",
+            measurementId: "G-C5CQYJQZPR"
+        };
+
+        // Inicializa Firebase e Firestore
+        const app = initializeApp(firebaseConfig);
+        const dbFirestore = getFirestore(app);
+
+        // Referência ao documento único (Banco de Dados "Monolítico")
+        const docRef = doc(dbFirestore, "mediaflow", "dados_elite_37");
+
+        // --- VARIÁVEIS GLOBAIS DO APP ---
         let db = { voluntarios: [], escalas: [], historico: [], checklist: [] };
         let currentSwapData = null;
         let pendingAction = null; 
         let selectedUserIdForConfirm = null;
 
-        window.onload = () => {
-            const saved = localStorage.getItem('mediaflow_elite_v33'); 
-            if(saved) {
-                db = JSON.parse(saved);
+        // --- SINCRONIZAÇÃO EM TEMPO REAL (SUBSTITUI window.onload) ---
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                db = docSnap.data();
+                updateUI();
+                console.log("🔥 Dados atualizados do Firebase!");
             } else {
-                const old = localStorage.getItem('mediaflow_elite_v32');
-                if(old) {
-                    db = JSON.parse(old);
-                    save(); 
-                } else {
-                    seed();
-                }
+                console.log("⚠️ Nenhum dado no Firebase. Criando base inicial...");
+                seed();
             }
-            renderFaceGrid();
-            updateUI();
-        };
+        }, (error) => {
+            console.error("Erro Firebase:", error);
+        });
 
-        function forceReset() {
-            if(confirm("ATENÇÃO: Isso apagará tudo e recarregará as datas editadas! Deseja continuar?")) {
-                localStorage.clear();
-                location.reload();
+        // --- FUNÇÃO DE SALVAR (AGORA NA NUVEM) ---
+        async function save() {
+            try {
+                await setDoc(docRef, db);
+                // Não precisa chamar updateUI(), o onSnapshot fará isso
+            } catch (e) {
+                console.error("Erro ao salvar:", e);
+                alert("Erro ao salvar na nuvem! Verifique sua internet.");
             }
         }
 
+        // --- SEED (POPULA DADOS INICIAIS) ---
         function seed() {
             /* DADOS CORRIGIDOS - FORMATO AAAA-MM-DD */
             const lista = [
@@ -422,7 +454,7 @@
                 {n: "Luiza Messa Lemos Farias", a: "Projeção", f: "luiza.jpg", d: "06/07"},
                 {n: "Higor Cauã Rosa Moreira", a: "Projeção", f: "higor.jpg", d: "19/08"},
                 {n: "Bryan Lucas Rodrigues de Souza", a: "Iluminação", f: "bryan.jpg", d: "29/01"},
-                {n: "Alex Gonçalves Victorino", a: "Transmissão, Suporte", f: "alex.jpg", d: "2000-11-20"}, /* DATA CORRIGIDA */
+                {n: "Alex Gonçalves Victorino", a: "Transmissão, Suporte", f: "alex.jpg", d: "2000-11-20"}, 
                 {n: "Kleber Lucas Pimenta Souza", a: "Projeção", f: "kleber.jpg", d: "01/07"},
                 {n: "Geovana Rodrigues dos Santos Costa", a: "Projeção", f: "geovana.jpg", d: "24/01"},
                 {n: "Alessandro dos Santos da Silva", a: "Iluminação", f: "alessandro.jpg", d: "25/04"},
@@ -440,40 +472,56 @@
             }));
             db.historico = [];
             db.escalas = [];
-            log("Sistema", "Base Elite 3.7 Iniciada");
+            log("Sistema", "Base Elite 3.7 Iniciada (Firebase)");
             save();
         }
 
-        function save() { localStorage.setItem('mediaflow_elite_v33', JSON.stringify(db)); updateUI(); }
+        // --- FUNÇÕES EXPOSTAS PARA O HTML (window.) ---
+        
+        window.forceReset = function() {
+            if(confirm("ATENÇÃO: Isso apagará tudo DO SERVIDOR para TODOS. Deseja continuar?")) {
+                seed();
+            }
+        };
 
-        /* --- MURAL DE ROSTOS FILTRADO --- */
+        window.toggleMenu = function() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        };
+
+        window.showSection = function(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).style.display = 'block';
+            if(event && event.currentTarget) event.currentTarget.classList.add('active');
+            if(window.innerWidth <= 768 && document.getElementById('sidebar').classList.contains('active')) window.toggleMenu();
+            
+            if(id === 'confirmacao') window.renderFaceGrid();
+        };
+
+        // --- MURAL DE ROSTOS ---
         function getPendingVolunteersIds() {
             const today = new Date();
             today.setHours(0,0,0,0);
             const pendingIds = new Set();
-
             db.escalas.forEach(e => {
                 const eDate = new Date(e.data + 'T12:00:00');
                 if (eDate >= today) { 
                     Object.keys(e.time).forEach(role => {
                         const vid = e.time[role];
                         const status = e.status[role];
-                        if (vid && status === 'pending') {
-                            pendingIds.add(parseInt(vid));
-                        }
+                        if (vid && status === 'pending') pendingIds.add(parseInt(vid));
                     });
                 }
             });
             return pendingIds;
         }
 
-        function renderFaceGrid() {
+        window.renderFaceGrid = function() {
             const term = document.getElementById('search-faces').value.toLowerCase();
             const container = document.getElementById('faces-grid-container');
             container.innerHTML = '';
-
             const pendingIds = getPendingVolunteersIds();
-
             const filtered = db.voluntarios.filter(v => {
                 const matchesSearch = v.nome.toLowerCase().includes(term);
                 const isPending = pendingIds.has(v.id);
@@ -484,7 +532,7 @@
                 if(pendingIds.size === 0) {
                     container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--success)"><i class="fas fa-check-double" style="font-size:2rem; margin-bottom:10px"></i><br>Tudo certo!<br>Ninguém precisa confirmar presença agora.</div>';
                 } else {
-                    container.innerHTML = '<p style="color:#94a3b8; grid-column:1/-1;">Ninguém encontrado com esse nome na lista de pendentes.</p>';
+                    container.innerHTML = '<p style="color:#94a3b8; grid-column:1/-1;">Ninguém encontrado.</p>';
                 }
                 return;
             }
@@ -504,12 +552,10 @@
 
         function selectUserForConfirm(id) {
             selectedUserIdForConfirm = id;
-            renderFaceGrid(); 
-            
+            window.renderFaceGrid(); 
             const user = db.voluntarios.find(v => v.id === id);
             document.getElementById('selected-user-name').innerText = `Olá, ${user.nome.split(' ')[0]}!`;
             document.getElementById('confirm-results').style.display = 'block';
-            
             loadUserScales(id);
             document.getElementById('confirm-results').scrollIntoView({ behavior: 'smooth' });
         }
@@ -518,7 +564,6 @@
             const container = document.getElementById('scale-list-container');
             const today = new Date();
             today.setHours(0,0,0,0);
-
             const myScales = db.escalas.filter(e => {
                 const date = new Date(e.data + 'T12:00:00'); 
                 const isInScale = Object.entries(e.time).some(([role, vid]) => vid == myId);
@@ -526,18 +571,13 @@
             }).sort((a,b) => new Date(a.data) - new Date(b.data));
 
             if(myScales.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align:center; padding:30px; background:white; border-radius:20px; box-shadow:var(--shadow)">
-                        <h3>Tudo tranquilo!</h3>
-                        <p>Você não tem escalas pendentes.</p>
-                    </div>`;
+                container.innerHTML = `<div style="text-align:center;">Você não tem escalas pendentes.</div>`;
                 return;
             }
 
             container.innerHTML = myScales.map(e => {
                 const role = Object.keys(e.time).find(key => e.time[key] == myId);
                 const currentStatus = e.status[role];
-                
                 let btnText = "CONFIRMAR PRESENÇA";
                 let btnColor = "var(--success)";
                 let disabled = "";
@@ -565,104 +605,80 @@
                         </div>
                     </div>
                 </div>
-                <button class="btn-confirm-big" style="background:${btnColor}" ${disabled} onclick="userConfirm(${e.id}, '${role}')">
+                <button class="btn-confirm-big" style="background:${btnColor}" ${disabled} onclick="window.userConfirm(${e.id}, '${role}')">
                     ${btnText}
                 </button>
                 <div style="margin-bottom:30px; text-align:center">
-                    ${currentStatus === 'pending' ? `<small style="color:#ef4444; cursor:pointer; text-decoration:underline" onclick="userDecline(${e.id}, '${role}')">Não posso ir (Recusar)</small>` : ''}
+                    ${currentStatus === 'pending' ? `<small style="color:#ef4444; cursor:pointer; text-decoration:underline" onclick="window.userDecline(${e.id}, '${role}')">Não posso ir (Recusar)</small>` : ''}
                 </div>
                 `;
             }).join('');
         }
 
-        function userConfirm(eid, role) {
+        window.userConfirm = function(eid, role) {
             const esc = db.escalas.find(e => e.id === eid);
             if(esc) {
                 esc.status[role] = 'confirmed';
                 const v = db.voluntarios.find(x => x.id == esc.time[role]);
                 log("Confirmação", `${v.nome.split(' ')[0]} confirmou presença.`);
-                save();
+                save(); 
                 loadUserScales(v.id);
-                setTimeout(() => {
-                    renderFaceGrid();
-                    if(document.getElementById('faces-grid-container').children.length === 0) {
-                         document.getElementById('confirm-results').style.display = 'none';
-                    }
-                }, 1000);
             }
-        }
+        };
 
-        function userDecline(eid, role) {
+        window.userDecline = function(eid, role) {
             if(confirm("Tem certeza que deseja recusar?")) {
                 const esc = db.escalas.find(e => e.id === eid);
                 if(esc) {
                     esc.status[role] = 'declined';
                     const v = db.voluntarios.find(x => x.id == esc.time[role]);
                     log("Confirmação", `${v.nome.split(' ')[0]} recusou escala.`);
-                    save();
+                    save(); 
                     loadUserScales(v.id);
-                    setTimeout(() => {
-                        renderFaceGrid();
-                         if(document.getElementById('faces-grid-container').children.length === 0) {
-                             document.getElementById('confirm-results').style.display = 'none';
-                        }
-                    }, 1000);
                 }
             }
-        }
+        };
 
-        /* --- SENHA (123456) --- */
-        function verifyAdmin(actionModalId, extraData = null) {
+        // --- SENHAS E MODAIS ---
+        window.verifyAdmin = function(actionModalId, extraData = null) {
             document.getElementById('input-senha').value = '';
             document.getElementById('modal-senha').showModal();
             pendingAction = { id: actionModalId, data: extraData };
-        }
+        };
 
-        function addPass(num) {
+        window.addPass = function(num) {
             const inp = document.getElementById('input-senha');
             if(inp.value.length < 6) inp.value += num;
-        }
-        function clearPass() { document.getElementById('input-senha').value = ''; }
+        };
+        window.clearPass = function() { document.getElementById('input-senha').value = ''; };
 
-        function checkPass() {
+        window.checkPass = function() {
             const pass = document.getElementById('input-senha').value;
             if(pass === '123456') {
                 document.getElementById('modal-senha').close();
                 if(pendingAction) {
                     if(pendingAction.id === 'modal-troca') {
                         execOpenTroca(pendingAction.data.eid, pendingAction.data.role);
-                    } else {
-                        if(pendingAction.id === 'modal-escala') { fillSelects(); toggleSuporteField(); }
-                        if(pendingAction.id === 'delete-v') {
-                            if(confirm("Confirma remoção?")) {
-                                db.voluntarios = db.voluntarios.filter(v => v.id !== pendingAction.data.id);
-                                save();
-                            }
-                        } else {
-                            document.getElementById(pendingAction.id).showModal();
+                    } else if(pendingAction.id === 'delete-v') {
+                        if(confirm("Confirma remoção?")) {
+                            db.voluntarios = db.voluntarios.filter(v => v.id !== pendingAction.data.id);
+                            save();
                         }
+                    } else if(pendingAction.id === 'modal-escala') {
+                        fillSelects();
+                        toggleSuporteField();
+                        document.getElementById(pendingAction.id).showModal();
+                    } else {
+                        document.getElementById(pendingAction.id).showModal();
                     }
                 }
             } else {
                 alert("Senha Incorreta!");
                 clearPass();
             }
-        }
+        };
 
-        /* --- FUNÇÕES GERAIS --- */
-        function toggleMenu() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
-        }
-
-        function showSection(id) {
-            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
-            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).style.display = 'block';
-            event.currentTarget.classList.add('active');
-            if(window.innerWidth <= 768) toggleMenu();
-        }
-
+        // --- UI GERAL ---
         function updateUI() {
             document.getElementById('count-v').innerText = db.voluntarios.length;
             document.getElementById('count-e').innerText = db.escalas.length;
@@ -679,21 +695,16 @@
             const currentMonth = new Date().getMonth(); 
             const bdayPeople = db.voluntarios.filter(v => {
                 if(!v.nascimento) return false;
-                // Proteção contra formatos estranhos para o cálculo do mês
                 const parts = v.nascimento.split(/[-/]/);
                 let month = -1;
-                // Se ISO (AAAA-MM-DD)
                 if(parts[0].length === 4 && parts.length === 3) month = parseInt(parts[1]) - 1;
-                // Se BR (DD/MM/AAAA ou DD/MM)
                 else if(parts.length >= 2) month = parseInt(parts[1]) - 1;
-
                 return month === currentMonth;
             }).sort((a,b) => {
-                 // Ordenação por dia
                  const getDay = (d) => {
                     const p = d.split(/[-/]/);
-                    if(p[0].length === 4) return parseInt(p[2]); // ISO
-                    return parseInt(p[0]); // BR
+                    if(p[0].length === 4) return parseInt(p[2]); 
+                    return parseInt(p[0]);
                  };
                  return getDay(a.nascimento) - getDay(b.nascimento);
             });
@@ -702,15 +713,11 @@
             if(bdayPeople.length === 0) {
                 bdayList.innerHTML = '<p style="color:#94a3b8; text-align:center">Nenhum aniversariante este mês.</p>';
             } else {
-                const bdayMsg = encodeURIComponent("Feliz Aniversário! \nQue seu novo ano seja repleto de saúde, paz e muitas alegrias!.\nDEUS ABENÇOE.");
-                
                 bdayList.innerHTML = bdayPeople.map(v => {
-                    // Formatação segura para exibição
                     let dia = '??';
                     const p = v.nascimento.split(/[-/]/);
-                    if(p[0].length === 4) dia = p[2]; // ISO
-                    else dia = p[0]; // BR
-
+                    if(p[0].length === 4) dia = p[2];
+                    else dia = p[0];
                     return `
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:#f8fafc; border-radius:12px;">
                         <img src="${v.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}'">
@@ -718,55 +725,38 @@
                             <div style="font-weight:700; font-size:0.9rem">${v.nome}</div>
                             <div style="font-size:0.8rem; color:var(--primary)">Dia ${dia}</div>
                         </div>
-                        <a href="https://wa.me/55${v.tel}?text=${bdayMsg}" target="_blank" class="btn btn-sm btn-whatsapp" style="border-radius:50%; width:35px; height:35px; padding:0; justify-content:center"><i class="fab fa-whatsapp"></i></a>
                     </div>`;
                 }).join('');
             }
 
             renderVoluntarios();
             renderEscalas();
-            renderLog();
-            renderFaceGrid();
+            window.renderLog();
+            if(document.getElementById('confirmacao').style.display === 'block') window.renderFaceGrid();
         }
 
         function renderVoluntarios() {
             const list = document.getElementById('lista-v');
             const areas = ["Projeção", "Iluminação", "Transmissão", "Suporte"];
-            
             list.innerHTML = areas.map(area => `
                 <div style="grid-column: 1/-1; margin-top:20px; border-bottom: 2px solid #e2e8f0; padding-bottom:5px">
                     <h3 style="margin:0; color:var(--primary)">${area}</h3>
                 </div>
                 ${db.voluntarios.filter(v => v.area.includes(area)).map(v => {
-                    
-                    // LÓGICA DE DATA CORRIGIDA (Robustez)
                     let nascFmt = "---";
                     if(v.nascimento) {
                         const parts = v.nascimento.replace(/\s/g, '').split(/[\/-]/);
-                        // Caso 1: AAAA-MM-DD
-                        if(parts[0].length === 4 && parts.length === 3) {
-                            nascFmt = `${parts[2]}/${parts[1]}`;
-                        } 
-                        // Caso 2: DD/MM/AAAA
-                        else if(parts.length === 3) {
-                            nascFmt = `${parts[0]}/${parts[1]}`;
-                        }
-                        // Caso 3: DD/MM
-                        else if(parts.length === 2) {
-                            nascFmt = `${parts[0]}/${parts[1]}`;
-                        }
+                        if(parts[0].length === 4 && parts.length === 3) nascFmt = `${parts[2]}/${parts[1]}`;
+                        else if(parts.length === 3 || parts.length === 2) nascFmt = `${parts[0]}/${parts[1]}`;
                     }
-
                     return `
                     <div class="v-card">
                         <img src="${v.foto}" onerror="this.src='https://ui-avatars.com/api/?name=${v.nome}&background=random'">
                         <h4 style="margin:5px 0 0 0; font-size:0.95rem">${v.nome}</h4>
                         <small style="color:var(--text-muted); margin-bottom:5px">${v.area}</small>
-                        <div style="font-size:0.8rem; background:#f1f5f9; padding:4px 8px; border-radius:8px; margin-top:5px">
-                            🎂 ${nascFmt}
-                        </div>
+                        <div style="font-size:0.8rem; background:#f1f5f9; padding:4px 8px; border-radius:8px; margin-top:5px">🎂 ${nascFmt}</div>
                         <div style="margin-top:10px; width:100%; display:flex; justify-content:center; gap:5px">
-                            <button class="btn btn-sm btn-danger" onclick="verifyAdmin('delete-v', {id: ${v.id}})" title="Remover"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="verifyAdmin('delete-v', {id: ${v.id}})"><i class="fas fa-trash"></i></button>
                             <button class="btn btn-sm btn-whatsapp" onclick="window.open('https://wa.me/55${v.tel}')"><i class="fab fa-whatsapp"></i></button>
                         </div>
                     </div>
@@ -774,23 +764,35 @@
             `).join('');
         }
 
-        function addVoluntario() {
+        window.addVoluntario = function() {
             const nome = document.getElementById('v-nome').value;
             const nasc = document.getElementById('v-nasc').value;
             const tel = document.getElementById('v-tel').value;
             const area = document.getElementById('v-area').value;
-            
-            if(!nome) return alert("Nome é obrigatório");
-            if(!nasc) return alert("Data de nascimento é obrigatória");
-            
+            // Pega o valor do novo campo de foto
+            const arquivoFoto = document.getElementById('v-foto-arquivo').value;
+
+            if(!nome || !nasc) return alert("Preencha nome e nascimento");
+
+            // Lógica: Se você digitou algo, usa a pasta img/. Se não, gera automático.
+            let caminhoFoto = `https://ui-avatars.com/api/?name=${nome}&background=random`;
+            if (arquivoFoto) {
+                caminhoFoto = `img/${arquivoFoto}`;
+            }
+
             db.voluntarios.push({
-                id: Date.now(), nome, tel, area, nascimento: nasc,
-                foto: `https://ui-avatars.com/api/?name=${nome}&background=random`
+                id: Date.now(), 
+                nome, 
+                tel, 
+                area, 
+                nascimento: nasc,
+                foto: caminhoFoto
             });
+
             log("Sistema", `Novo voluntário: ${nome}`);
-            closeModal('modal-voluntario');
+            window.closeModal('modal-voluntario');
             save();
-        }
+        };
 
         function renderEscalas() {
             const list = document.getElementById('lista-escalas');
@@ -843,8 +845,8 @@
                                 <p style="margin:0; color:var(--text-muted); font-weight:600">${e.tipo}</p>
                             </div>
                             <div>
-                                <button class="btn btn-sm btn-primary" onclick="copyEscala(${e.id})"><i class="fas fa-share-nodes"></i></button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteEscala(${e.id})"><i class="fas fa-trash"></i></button>
+                                <button class="btn btn-sm btn-primary" onclick="window.copyEscala(${e.id})"><i class="fas fa-share-nodes"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="window.deleteEscala(${e.id})"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                         <div class="escala-grid">
@@ -855,7 +857,7 @@
             }).join('');
         }
 
-        function addEscala() {
+        window.addEscala = function() {
             const data = document.getElementById('e-data').value;
             const titulo = document.getElementById('e-tipo').value;
             const categoria = document.getElementById('e-categoria').value;
@@ -881,10 +883,10 @@
                 id: Date.now(), data, tipo: titulo || "Culto", 
                 categoria, time, status, isSuporteExterno 
             });
-            log("Escala", `Nova escala criada: ${titulo} (${categoria})`);
-            closeModal('modal-escala');
+            log("Escala", `Nova escala criada: ${titulo}`);
+            window.closeModal('modal-escala');
             save();
-        }
+        };
 
         function execOpenTroca(eid, role) {
             currentSwapData = { eid, role };
@@ -893,14 +895,13 @@
             const sel = document.getElementById('sel-troca');
             sel.innerHTML = '<option value="">Selecionar...</option>';
             const filtroArea = (role === 'suporte') ? 'Suporte' : areaMap[role];
-            
             db.voluntarios.filter(v => v.area.includes(filtroArea)).forEach(v => {
                 sel.innerHTML += `<option value="${v.id}">${v.nome}</option>`;
             });
             document.getElementById('modal-troca').showModal();
         }
 
-        function confirmTroca() {
+        window.confirmTroca = function() {
             const nid = document.getElementById('sel-troca').value;
             const esc = db.escalas.find(e => e.id === currentSwapData.eid);
             if(esc && nid) {
@@ -911,34 +912,31 @@
                 esc.status[currentSwapData.role] = 'pending'; 
                 log("Troca", `Troca em ${esc.tipo}: Entrou ${novoMembro.nome}`);
                 save();
-                closeModal('modal-troca');
-                renderFaceGrid(); 
+                window.closeModal('modal-troca');
             }
-        }
+        };
 
-        function deleteEscala(id) {
+        window.deleteEscala = function(id) {
             if(confirm('Excluir esta escala?')) {
                 db.escalas = db.escalas.filter(e => e.id !== id);
                 log("Escala", "Escala excluída");
                 save();
-                renderFaceGrid();
             }
-        }
+        };
 
-        function openModal(id) { document.getElementById(id).showModal(); }
-        function closeModal(id) { document.getElementById(id).close(); }
+        window.openModal = function(id) { document.getElementById(id).showModal(); };
+        window.closeModal = function(id) { document.getElementById(id).close(); };
 
-        function toggleSuporteField() {
+        window.toggleSuporteField = function() {
             const cat = document.getElementById('e-categoria').value;
-            const wrap = document.getElementById('wrapper-suporte');
-            wrap.style.display = (cat === 'especial') ? 'block' : 'none';
-        }
+            document.getElementById('wrapper-suporte').style.display = (cat === 'especial') ? 'block' : 'none';
+        };
 
-        function toggleInputSuporte() {
+        window.toggleInputSuporte = function() {
             const isExterno = document.getElementById('check-externo').checked;
             document.getElementById('sel-suporte').style.display = isExterno ? 'none' : 'block';
             document.getElementById('inp-suporte-ext').style.display = isExterno ? 'block' : 'none';
-        }
+        };
 
         function fillSelects() {
             const map = { 'sel-projecao': 'Projeção', 'sel-iluminacao': 'Iluminação', 'sel-transmissao': 'Transmissão', 'sel-suporte': 'Suporte' };
@@ -952,7 +950,7 @@
             }
         }
 
-        function copyEscala(id) {
+        window.copyEscala = function(id) {
             const e = db.escalas.find(x => x.id === id);
             const safeStatus = e.status || {};
             const getVName = (role) => {
@@ -970,14 +968,14 @@
             txt += `📡 Cam: ${getVName('transmissao')}\n`;
             if(e.time.suporte) txt += `🏃 Sup: ${getVName('suporte')}\n`;
             navigator.clipboard.writeText(txt).then(() => alert("Copiado para o WhatsApp!"));
-        }
+        };
 
         function log(tipo, msg) {
             db.historico.unshift({ t: tipo, m: msg, d: new Date().toLocaleString('pt-BR') });
             if(db.historico.length > 50) db.historico.pop();
         }
 
-        function renderLog() {
+        window.renderLog = function() {
             const f = document.getElementById('filter-log').value;
             const container = document.getElementById('log-list');
             const filtered = db.historico.filter(h => f === 'Tudo' || h.t === f);
@@ -995,12 +993,11 @@
                     <small style="color:var(--text-muted)">${h.d}</small>
                 </div>
             `}).join('');
-        }
+        };
 
-        function resetChecklist() {
+        window.resetChecklist = function() {
             document.querySelectorAll('#check-container input').forEach(c => c.checked = false);
-        }
+        };
     </script>
 </body>
 </html>
-
